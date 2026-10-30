@@ -107,6 +107,7 @@ async function boot() {
     const index = r.ok ? await r.json() : null;
     const items = index && Array.isArray(index.sessions) ? index.sessions.filter((x) => x && typeof x.file === "string" && /^[\w./-]+\.json$/.test(x.file) && !x.file.includes("..")) : [];
     const loaded = await Promise.all(items.map((x) => fetch("data/" + x.file, { cache: "no-cache" }).then((q) => (q.ok ? q.json() : null)).catch(() => null)));
+    S.maps = index && Array.isArray(index.maps) ? index.maps.filter((m) => m && /^maps\/[\w-]+\.(svg|png)$/.test(m.file)) : [];
     S.sessions = loaded.filter((s) => s && s.id && Array.isArray(s.entries) && s.drivers);
   } catch (e) { /* no data folder: the page still works with opened files */ }
   recompute();

@@ -1,8 +1,20 @@
 {
  "format": 1,
  "app": "ACE Practice Laps",
- "updated": "2026-10-30T16:27:30",
+ "updated": "2026-10-30T18:24:29",
  "sessions": [
+  {
+   "id": "72623aa907f1",
+   "file": "sessions/72623aa907f1.json",
+   "track": "Road Atlanta",
+   "layout": "GP",
+   "date": "2026-10-22",
+   "time": "08:52:35",
+   "type": "Race",
+   "weather": "Dry",
+   "drivers": 14,
+   "laps": 278
+  },
   {
    "id": "da78b72bbc0d",
    "file": "sessions/da78b72bbc0d.json",
@@ -26,6 +38,174 @@
    "weather": "Dry",
    "drivers": 15,
    "laps": 324
+  },
+  {
+   "id": "f432866c46fb",
+   "file": "sessions/f432866c46fb.json",
+   "track": "Donington Park",
+   "layout": "GP",
+   "date": "2026-10-29",
+   "time": "09:48:15",
+   "type": "Race",
+   "weather": "Dry",
+   "drivers": 14,
+   "laps": 293
+  }
+ ],
+ "maps": [
+  {
+   "circuit": "Brands Hatch",
+   "layout": "GP",
+   "file": "maps/brandshatch-gp.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "John Chapman"
+  },
+  {
+   "circuit": "Brands Hatch",
+   "layout": "Indy",
+   "file": "maps/brandshatch-indy.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "John Chapman"
+  },
+  {
+   "circuit": "Circuit of the Americas",
+   "layout": "GP",
+   "file": "maps/circuitoftheamericas-gp.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "ごひょううべこ"
+  },
+  {
+   "circuit": "Circuit of the Americas",
+   "layout": "National",
+   "file": "maps/circuitoftheamericas-national.png",
+   "licence": "CC BY-SA 4.0",
+   "author": "WL2392"
+  },
+  {
+   "circuit": "Donington Park",
+   "layout": "GP",
+   "file": "maps/doningtonpark-gp.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger, bamse"
+  },
+  {
+   "circuit": "Fuji Speedway",
+   "layout": "",
+   "file": "maps/fujispeedway-x.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Imola",
+   "layout": "GP",
+   "file": "maps/imola-gp.svg",
+   "licence": "CC BY 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Kyalami",
+   "layout": "GP",
+   "file": "maps/kyalami-gp.svg",
+   "licence": "Public domain",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Laguna Seca",
+   "layout": "GP",
+   "file": "maps/lagunaseca-gp.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Monza",
+   "layout": "GP",
+   "file": "maps/monza-gp.svg",
+   "licence": "CC0",
+   "author": "Firkin"
+  },
+  {
+   "circuit": "Mount Panorama",
+   "layout": "GP",
+   "file": "maps/mountpanorama-gp.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Nurburgring",
+   "layout": "GP",
+   "file": "maps/nurburgring-gp.svg",
+   "licence": "Public domain",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Oulton Park",
+   "layout": "",
+   "file": "maps/oultonpark-x.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Paul Ricard",
+   "layout": "",
+   "file": "maps/paulricard-x.svg",
+   "licence": "CC0",
+   "author": "HumanBodyPiloter5"
+  },
+  {
+   "circuit": "Red Bull Ring",
+   "layout": "GP",
+   "file": "maps/redbullring-gp.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "HumanBodyPiloter5"
+  },
+  {
+   "circuit": "Road Atlanta",
+   "layout": "GP",
+   "file": "maps/roadatlanta-gp.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Sebring",
+   "layout": "Full",
+   "file": "maps/sebring-full.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Spa-Francorchamps",
+   "layout": "GP",
+   "file": "maps/spafrancorchamps-gp.svg",
+   "licence": "CC0",
+   "author": "Firkin"
+  },
+  {
+   "circuit": "Suzuka",
+   "layout": "GP",
+   "file": "maps/suzuka-gp.svg",
+   "licence": "CC0",
+   "author": "Ocdp"
+  },
+  {
+   "circuit": "Suzuka",
+   "layout": "East",
+   "file": "maps/suzuka-east.png",
+   "licence": "CC BY-SA 3.0",
+   "author": "Toivonen"
+  },
+  {
+   "circuit": "Watkins Glen",
+   "layout": "GP",
+   "file": "maps/watkinsglen-gp.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "Stl66dmk"
+  },
+  {
+   "circuit": "Watkins Glen",
+   "layout": "Short",
+   "file": "maps/watkinsglen-short.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "Stl66dmk"
   }
  ]
 }

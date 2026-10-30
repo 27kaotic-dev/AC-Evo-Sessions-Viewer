@@ -1,0 +1,415 @@
+{
+ "format": 1,
+ "app": "ACE Practice Laps",
+ "updated": "2026-10-30T19:10:30",
+ "sessions": [
+  {
+   "id": "0e6f487092f1",
+   "file": "sessions/0e6f487092f1.json",
+   "track": "Watkins Glen International",
+   "layout": "GP Inner Loop",
+   "date": "2026-10-13",
+   "time": "08:00:35",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 14,
+   "laps": 135
+  },
+  {
+   "id": "da7e50d3e3a0",
+   "file": "sessions/da7e50d3e3a0.json",
+   "track": "Watkins Glen International",
+   "layout": "GP Inner Loop",
+   "date": "2026-10-15",
+   "time": "06:38:33",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 5,
+   "laps": 38
+  },
+  {
+   "id": "1df1bd428b4a",
+   "file": "sessions/1df1bd428b4a.json",
+   "track": "Watkins Glen International",
+   "layout": "GP Inner Loop",
+   "date": "2026-10-15",
+   "time": "08:01:58",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 16,
+   "laps": 175
+  },
+  {
+   "id": "570f89bce680",
+   "file": "sessions/570f89bce680.json",
+   "track": "Watkins Glen International",
+   "layout": "GP Inner Loop",
+   "date": "2026-10-15",
+   "time": "08:10:20",
+   "type": "Qualify",
+   "weather": "Dry",
+   "drivers": 16,
+   "laps": 29
+  },
+  {
+   "id": "0c12805e0ec6",
+   "file": "sessions/0c12805e0ec6.json",
+   "track": "Watkins Glen International",
+   "layout": "GP Inner Loop",
+   "date": "2026-10-15",
+   "time": "08:48:38",
+   "type": "Race",
+   "weather": "Dry",
+   "drivers": 18,
+   "laps": 242
+  },
+  {
+   "id": "c9196f9a4df0",
+   "file": "sessions/c9196f9a4df0.json",
+   "track": "Watkins Glen International",
+   "layout": "GP Inner Loop",
+   "date": "2026-10-15",
+   "time": "09:04:22",
+   "type": "Qualify",
+   "weather": "Dry",
+   "drivers": 12,
+   "laps": 20
+  },
+  {
+   "id": "bffad54d38a0",
+   "file": "sessions/bffad54d38a0.json",
+   "track": "Watkins Glen International",
+   "layout": "GP Inner Loop",
+   "date": "2026-10-15",
+   "time": "09:42:31",
+   "type": "Race",
+   "weather": "Dry",
+   "drivers": 16,
+   "laps": 268
+  },
+  {
+   "id": "5309d2d23409",
+   "file": "sessions/5309d2d23409.json",
+   "track": "Road Atlanta",
+   "layout": "GP",
+   "date": "2026-10-20",
+   "time": "09:59:28",
+   "type": "Race",
+   "weather": "Dry",
+   "drivers": 10,
+   "laps": 96
+  },
+  {
+   "id": "6fc4d660882c",
+   "file": "sessions/6fc4d660882c.json",
+   "track": "Road Atlanta",
+   "layout": "GP",
+   "date": "2026-10-21",
+   "time": "09:37:13",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 8,
+   "laps": 134
+  },
+  {
+   "id": "f52a2b1add84",
+   "file": "sessions/f52a2b1add84.json",
+   "track": "Road Atlanta",
+   "layout": "GP",
+   "date": "2026-10-21",
+   "time": "11:21:39",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 7,
+   "laps": 55
+  },
+  {
+   "id": "0a36227ccc2c",
+   "file": "sessions/0a36227ccc2c.json",
+   "track": "Road Atlanta",
+   "layout": "GP",
+   "date": "2026-10-22",
+   "time": "08:05:45",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 14,
+   "laps": 325
+  },
+  {
+   "id": "be0c48610db8",
+   "file": "sessions/be0c48610db8.json",
+   "track": "Road Atlanta",
+   "layout": "GP",
+   "date": "2026-10-22",
+   "time": "08:13:37",
+   "type": "Qualify",
+   "weather": "Dry",
+   "drivers": 10,
+   "laps": 24
+  },
+  {
+   "id": "72623aa907f1",
+   "file": "sessions/72623aa907f1.json",
+   "track": "Road Atlanta",
+   "layout": "GP",
+   "date": "2026-10-22",
+   "time": "08:52:35",
+   "type": "Race",
+   "weather": "Dry",
+   "drivers": 14,
+   "laps": 278
+  },
+  {
+   "id": "6e4a2f95716e",
+   "file": "sessions/6e4a2f95716e.json",
+   "track": "Road Atlanta",
+   "layout": "GP",
+   "date": "2026-10-22",
+   "time": "09:11:30",
+   "type": "Qualify",
+   "weather": "Dry",
+   "drivers": 11,
+   "laps": 28
+  },
+  {
+   "id": "bfaf10b768f4",
+   "file": "sessions/bfaf10b768f4.json",
+   "track": "Road Atlanta",
+   "layout": "GP",
+   "date": "2026-10-22",
+   "time": "09:50:13",
+   "type": "Race",
+   "weather": "Dry",
+   "drivers": 13,
+   "laps": 262
+  },
+  {
+   "id": "da78b72bbc0d",
+   "file": "sessions/da78b72bbc0d.json",
+   "track": "Donington Park",
+   "layout": "GP",
+   "date": "2026-10-27",
+   "time": "08:05:13",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 7,
+   "laps": 96
+  },
+  {
+   "id": "d938fd9af591",
+   "file": "sessions/d938fd9af591.json",
+   "track": "Donington Park",
+   "layout": "GP",
+   "date": "2026-10-29",
+   "time": "08:02:23",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 15,
+   "laps": 324
+  },
+  {
+   "id": "8f488484e516",
+   "file": "sessions/8f488484e516.json",
+   "track": "Donington Park",
+   "layout": "GP",
+   "date": "2026-10-29",
+   "time": "08:10:11",
+   "type": "Qualify",
+   "weather": "Dry",
+   "drivers": 13,
+   "laps": 31
+  },
+  {
+   "id": "273d29ee4fad",
+   "file": "sessions/273d29ee4fad.json",
+   "track": "Donington Park",
+   "layout": "GP",
+   "date": "2026-10-29",
+   "time": "08:49:45",
+   "type": "Race",
+   "weather": "Dry",
+   "drivers": 17,
+   "laps": 323
+  },
+  {
+   "id": "34d1df7ad9c3",
+   "file": "sessions/34d1df7ad9c3.json",
+   "track": "Donington Park",
+   "layout": "GP",
+   "date": "2026-10-29",
+   "time": "09:08:22",
+   "type": "Qualify",
+   "weather": "Dry",
+   "drivers": 12,
+   "laps": 32
+  },
+  {
+   "id": "f432866c46fb",
+   "file": "sessions/f432866c46fb.json",
+   "track": "Donington Park",
+   "layout": "GP",
+   "date": "2026-10-29",
+   "time": "09:48:15",
+   "type": "Race",
+   "weather": "Dry",
+   "drivers": 14,
+   "laps": 293
+  }
+ ],
+ "maps": [
+  {
+   "circuit": "Brands Hatch",
+   "layout": "GP",
+   "file": "maps/brandshatch-gp.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "John Chapman"
+  },
+  {
+   "circuit": "Brands Hatch",
+   "layout": "Indy",
+   "file": "maps/brandshatch-indy.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "John Chapman"
+  },
+  {
+   "circuit": "Circuit of the Americas",
+   "layout": "GP",
+   "file": "maps/circuitoftheamericas-gp.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "ごひょううべこ"
+  },
+  {
+   "circuit": "Circuit of the Americas",
+   "layout": "National",
+   "file": "maps/circuitoftheamericas-national.png",
+   "licence": "CC BY-SA 4.0",
+   "author": "WL2392"
+  },
+  {
+   "circuit": "Donington Park",
+   "layout": "GP",
+   "file": "maps/doningtonpark-gp.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger, bamse"
+  },
+  {
+   "circuit": "Fuji Speedway",
+   "layout": "",
+   "file": "maps/fujispeedway-x.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Imola",
+   "layout": "GP",
+   "file": "maps/imola-gp.svg",
+   "licence": "CC BY 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Kyalami",
+   "layout": "GP",
+   "file": "maps/kyalami-gp.svg",
+   "licence": "Public domain",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Laguna Seca",
+   "layout": "GP",
+   "file": "maps/lagunaseca-gp.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Monza",
+   "layout": "GP",
+   "file": "maps/monza-gp.svg",
+   "licence": "CC0",
+   "author": "Firkin"
+  },
+  {
+   "circuit": "Mount Panorama",
+   "layout": "GP",
+   "file": "maps/mountpanorama-gp.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Nurburgring",
+   "layout": "GP",
+   "file": "maps/nurburgring-gp.svg",
+   "licence": "Public domain",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Oulton Park",
+   "layout": "",
+   "file": "maps/oultonpark-x.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Paul Ricard",
+   "layout": "",
+   "file": "maps/paulricard-x.svg",
+   "licence": "CC0",
+   "author": "HumanBodyPiloter5"
+  },
+  {
+   "circuit": "Red Bull Ring",
+   "layout": "GP",
+   "file": "maps/redbullring-gp.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "HumanBodyPiloter5"
+  },
+  {
+   "circuit": "Road Atlanta",
+   "layout": "GP",
+   "file": "maps/roadatlanta-gp.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Sebring",
+   "layout": "Full",
+   "file": "maps/sebring-full.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Spa-Francorchamps",
+   "layout": "GP",
+   "file": "maps/spafrancorchamps-gp.svg",
+   "licence": "CC0",
+   "author": "Firkin"
+  },
+  {
+   "circuit": "Suzuka",
+   "layout": "GP",
+   "file": "maps/suzuka-gp.svg",
+   "licence": "CC0",
+   "author": "Ocdp"
+  },
+  {
+   "circuit": "Suzuka",
+   "layout": "East",
+   "file": "maps/suzuka-east.png",
+   "licence": "CC BY-SA 3.0",
+   "author": "Toivonen"
+  },
+  {
+   "circuit": "Watkins Glen",
+   "layout": "GP",
+   "file": "maps/watkinsglen-gp.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "Stl66dmk"
+  },
+  {
+   "circuit": "Watkins Glen",
+   "layout": "Short",
+   "file": "maps/watkinsglen-short.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "Stl66dmk"
+  }
+ ]
+}

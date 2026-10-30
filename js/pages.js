@@ -219,23 +219,24 @@ function tIncidents(rows) {
 }
 
 /* ---------------------------------------------------------------- tracks */
+const mapSlug = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+function findMap(track, layout) {
+  const t = mapSlug(track), l = mapSlug(layout);
+  const mine = (S.maps || []).filter((m) => { const c = mapSlug(m.circuit); return c && (t.includes(c) || c.includes(t)); });
+  if (!t || !mine.length) return null;
+  let exact = l ? mine.find((m) => mapSlug(m.layout) === l) : null;
+  if (!exact && (l.startsWith("gp") || l.startsWith("innerloop"))) exact = mine.find((m) => mapSlug(m.layout) === "gp") || null;     // e.g. "GP Inner Loop" = the full circuit
+  if (exact || (l && !["gp", "grandprix", "full", "f1", "default"].includes(l))) return exact || null;
+  return mine.find((m) => ["gp", "full", ""].includes(mapSlug(m.layout))) || mine[0];
+}
 function viewTracks() {
   const root = h("div", { class: "page" });
   const st = P.tracks, ss0 = sortedSessions(allSessions()), ss = ss0;
   const tracks = statsTracks(ss);
   if (!tracks.some((t) => t.tkey === st.sel)) st.sel = tracks.length ? tracks[0].tkey : "";
   const detail = h("div");
-  const rows = tracks.map((x) => {
-    const b = statsBoard(ss, x.tkey), top = b.length && b[0].best ? b[0] : null;
-    return { id: x.tkey, cells: [td(trackLabel(x.track, x.layout), "b"), td(x.sessions, "c"), td(x.drivers, "c"), td(x.laps, "c dim"), td(x.valid, "c dim"),
-      td(top ? fmtTime(top.best) : "-", "c " + (top ? "purple b" : "dim")), td(top ? nameOf(top.pid) : "", "b"),
-      td(top ? fmtDate(top.date) : "", "c dim"), td(top ? top.car : "", "dim")] };
-  });
-  root.append(tracks.length ? listTable(["Track", "Sessions", "Drivers", "Laps", "Valid laps", "Record", "Held by", "Set on", "Car"], rows, (id) => { st.sel = id; st.car = ""; pickRow(id); }, st.sel) : noData("No sessions yet."), detail);
-  function pickRow(id) {
-    root.querySelectorAll(".listwrap tr.link").forEach((tr) => tr.classList.toggle("focus", tr.id === "row-" + id));
-    drawDetail();
-  }
+  tracks.sort((a, b) => lc(trackLabel(a.track, a.layout)).localeCompare(lc(trackLabel(b.track, b.layout))));
+  if (!tracks.length) { root.append(noData("No sessions yet.")); return root; }
   function drawDetail() {
     clear(detail);
     const x = tracks.find((t) => t.tkey === st.sel);
@@ -245,13 +246,18 @@ function viewTracks() {
     const sw = ss0.filter((s) => weatherOk(s, st.weather));
     const board = statsBoard(sw, x.tkey, car, since).filter((r) => r.best);
     const here = sw.filter((s) => trackKey(s.track, s.layout) === x.tkey && (!since || s.date >= since) && (!car || s.entries.some((e) => e.car === car)));
-    const bar = pickerBar(selectOf("Car:", st.car, [["", "All cars"], ...x.cars.map((c) => [c, c])], (v) => { st.car = v; drawDetail(); }),
+    const bar = pickerBar(selectOf("Track:", st.sel, tracks.map((t) => [t.tkey, `${trackLabel(t.track, t.layout)}  (${t.sessions} session${t.sessions === 1 ? "" : "s"})`]), (v) => { st.sel = v; st.car = ""; drawDetail(); }),
+      selectOf("Car:", st.car, [["", "All cars"], ...x.cars.map((c) => [c, c])], (v) => { st.car = v; drawDetail(); }),
       selectOf("Period:", st.period, PERIODS.map(([t], i) => [i, t]), (v) => { st.period = +v; drawDetail(); }),
       selectOf("Weather:", st.weather, WEATHERS, (v) => { st.weather = v; drawDetail(); }), h("span", { class: "grow" }),
       csvButton(() => visibleTable(detail), () => `${x.track}_${x.layout}_leaderboard`));
     const top = board[0];
+    const mp = findMap(x.track, x.layout);
     const chips = h("div", { class: "chips" }, top ? chip("Record", fmtTime(top.best), cssVar("--purple")) : null, top ? chip("Held by", nameOf(top.pid)) : null,
-      top ? chip("Set on", fmtDate(top.date)) : null, chip("Sessions", here.length), chip("Drivers", board.length));
+      top ? chip("Set on", fmtDate(top.date)) : null, top ? chip("Car", top.car) : null, chip("Sessions", here.length), chip("Drivers", board.length),
+      chip("Laps", `${board.reduce((a, r) => a + r.valid, 0)} valid of ${board.reduce((a, r) => a + r.laps, 0)}`));
+    const topRow = h("div", { class: "toprow" }, chips, mp ? h("figure", { class: "trackmap" }, h("img", { src: "data/" + mp.file, alt: "Map of " + trackLabel(x.track, x.layout) }),
+      h("figcaption", { text: `Map: ${mp.author}, ${mp.licence} (Wikimedia Commons)` })) : null);
     const tabs = tabset([
       { title: "Leaderboard", make: () => table(["Pos", "Driver", "Best lap", "Gap", "Ideal lap", "Sessions", "Laps", "Valid", "Car", "Date"],
         board.map((r) => h("tr", null, td(r.pos, "c b " + medalClass(r.pos)), td(nameOf(r.pid), "b"), td(fmtTime(r.best), "r " + pc(r.pos === 1, "purple b")), td(r.gap ? fmtGap(r.gap) : "", "r dim"),
@@ -278,8 +284,9 @@ function viewTracks() {
         return h("tr", null, td(fmtDate(s.date), "b"), td(s.time, "c dim"), td(s.type, "c dim"), td(s.entries.length, "c"), td(lead ? fmtTime(lead.best) : "-", "r " + (lead ? "purple b" : "dim")), td(lead ? nameOf(lead.pid) : "", "dim"));
       })) },
     ], S.trackTab || 0);
-    detail.append(bar, chips, tabs.el);
+    detail.append(bar, topRow, tabs.el);
   }
+  root.append(detail);
   drawDetail();
   return root;
 }
