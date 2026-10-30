@@ -43,6 +43,14 @@ function listTable(heads, rows, onPick, selected) {
 }
 const rowLink = (sid) => ({ ondblclick: () => openSession(sid), title: "Double-click to open the session", style: { cursor: "pointer" } });
 const CLICK_HINT = "  Click a point to open that session.";
+/* the "Show laps" box of the lap charts (remembered in this browser): laps further than this from the driver's median lap are left out */
+const LAP_FILTERS = [["0", "All laps"], ["0.1", "Within 10%"], ["0.06", "Within 6%"], ["0.04", "Within 4%"], ["0.02", "Within 2%"]];
+function outlierPct() { try { const v = localStorage.getItem("lap_outlier"); if (v !== null && LAP_FILTERS.some(([k]) => k === v)) return +v; } catch (e) { /* storage blocked */ } return OUTLIER; }
+function outlierPicker(onchange) {
+  const cur = String(outlierPct());
+  return selectOf("Show laps:", LAP_FILTERS.some(([k]) => k === cur) ? cur : "0.1", LAP_FILTERS,
+    (v) => { try { localStorage.setItem("lap_outlier", v); } catch (e) { /* storage blocked */ } onchange(); });
+}
 function pickerBar(...kids) { return h("div", { class: "toolbar" }, kids); }
 const WEATHERS = [["", "All weather"], ["Dry", "Dry"], ["Damp", "Damp"], ["Wet", "Wet"], ["Mixed", "Mixed"], ["-", "Not set"]];
 const weatherOk = (s, w) => !w || (w === "-" ? !s.weather : s.weather === w);
@@ -111,11 +119,11 @@ function sessionDetail(sess) {
     { title: "Laps", make: () => tLaps(rows, sess) },
     { title: "Sectors / Ideal Lap", make: () => tSectors(rows) },
     { title: "Consistency", make: () => tCons(rows) },
-    { title: "Lap times", make: () => lineBox(rows.map((r) => { const out = lapOutliers(r.e.laps); return { label: nameOf(r.pid), color: colorOf(r.pid), gaps: [...out],
+    { title: "Lap times", make: () => h("div", null, pickerBar(outlierPicker(renderView)), lineBox(rows.map((r) => { const out = lapOutliers(r.e.laps, outlierPct()); return { label: nameOf(r.pid), color: colorOf(r.pid), gaps: [...out],
       pts: r.e.laps.map((l, i) => [i + 1, l[0], l]).filter(([n, , l]) => l[4] && l[0] > 0 && !out.has(n)).map(([x, y]) => [x, y]) }; }).filter((s) => s.pts.length), {},
-      "Every valid lap, lap by lap. A lap more than 7% away from the driver's median lap (in / out laps, spins) is left out and shows as a gap in the line.") },
-    { title: "Best lap progress", make: () => lineBox(rows.map((r) => { const out = lapOutliers(r.e.laps); let run = 0; const pts = []; r.e.laps.forEach((l, i) => { if (l[4] && l[0] > 0 && !out.has(i + 1) && (!run || l[0] < run)) { run = l[0]; pts.push([i + 1, run]); } }); return { label: nameOf(r.pid), color: colorOf(r.pid), pts }; }).filter((s) => s.pts.length), {},
-      "Each point is a lap that was a new best for that driver, joined by a line: the steps down show when they found time. Laps more than 7% away from the driver's median lap are not counted.") },
+      "Every valid lap, lap by lap. A lap further from the driver's median lap than the Show laps choice (in / out laps, spins) is left out and shows as a gap in the line.")) },
+    { title: "Best lap progress", make: () => h("div", null, pickerBar(outlierPicker(renderView)), lineBox(rows.map((r) => { const out = lapOutliers(r.e.laps, outlierPct()); let run = 0; const pts = []; r.e.laps.forEach((l, i) => { if (l[4] && l[0] > 0 && !out.has(i + 1) && (!run || l[0] < run)) { run = l[0]; pts.push([i + 1, run]); } }); return { label: nameOf(r.pid), color: colorOf(r.pid), pts }; }).filter((s) => s.pts.length), {},
+      "Each point is a lap that was a new best for that driver, joined by a line: the steps down show when they found time. Laps further from the driver's median lap than the Show laps choice are not counted.")) },
     { title: "Time found", make: () => tFound(rows) },
     { title: "Cuts / incidents", make: () => tIncidents(rows) },
   ], 0, "session");
@@ -396,9 +404,10 @@ function viewH2h() {
     const sess = ss.find((x) => x.id === selSess.v);
     if (!sess) return noData("Pick a session in the Sessions together tab.");
     const series = [[st.a, H2H_A], [st.b, H2H_B]].map(([pid, col]) => { const e = sess.entries.find((q) => q.pid === pid);
-      const out = e ? lapOutliers(e.laps) : new Set();
+      const out = e ? lapOutliers(e.laps, outlierPct()) : new Set();
       return { label: nameOf(pid), color: col, gaps: [...out], pts: e ? e.laps.map((l, i) => [i + 1, l[0], l]).filter(([n, , l]) => l[4] && l[0] > 0 && !out.has(n)).map(([x, y]) => [x, y]) : [] }; }).filter((q) => q.pts.length);
-    return lineBox(series, {}, `Every valid lap of the session on ${fmtDate(sess.date)}. A lap more than 7% away from the driver's median lap is left out and shows as a gap.`, 380);
+    return h("div", null, pickerBar(outlierPicker(drawLower)),
+      lineBox(series, {}, `Every valid lap of the session on ${fmtDate(sess.date)}. A lap further from the driver's median lap than the Show laps choice is left out and shows as a gap.`, 380));
   }
   function lowerProgress() {
     const here = ss.filter((x) => trackKey(x.track, x.layout) === selTrack.v), xl = {}, links = {};

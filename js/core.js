@@ -4,7 +4,7 @@
 
 const LAP_VALID = 2;            // the game counts a lap towards the best lap when this flag is set
 const CONS_WINDOW = 1.08;       // a lap counts for consistency when it is valid and within 8% of the driver's best lap
-const OUTLIER = 0.07;           // the lap charts leave out a valid lap more than 7% away from the driver's median lap
+const OUTLIER = 0.10;           // the lap charts leave out a valid lap more than 10% (to start with) away from the driver's median lap
 const CONS_SCALE = 10;          // consistency = 100 - 10 x (standard deviation as a % of the average lap)
 const FORMAT = 1;
 const INVESTIGATION = { InvestigationType_Racecar_Cut: "cut", InvestigationType_Speeding: "pit speeding",
@@ -122,12 +122,12 @@ function parseSession(root, source, lastModified) {
 }
 
 /* ---------------------------------------------------------------- the numbers */
-/* lap numbers (1 = first) of the valid laps more than 7% away from the driver's median valid lap */
-function lapOutliers(laps) {
+/* lap numbers (1 = first) of the valid laps further than the Show laps choice from the driver's median valid lap */
+function lapOutliers(laps, pct = OUTLIER) {
   const t = laps.filter((l) => l[4] && l[0] > 0).map((l) => l[0]).sort((a, b) => a - b), n = t.length;
-  if (n < 3) return new Set();
+  if (n < 3 || !pct) return new Set();
   const med = n % 2 ? t[(n - 1) / 2] : (t[n / 2 - 1] + t[n / 2]) / 2, out = new Set();
-  laps.forEach((l, i) => { if (l[4] && l[0] > 0 && Math.abs(l[0] - med) > OUTLIER * med) out.add(i + 1); });
+  laps.forEach((l, i) => { if (l[4] && l[0] > 0 && Math.abs(l[0] - med) > pct * med) out.add(i + 1); });
   return out;
 }
 
