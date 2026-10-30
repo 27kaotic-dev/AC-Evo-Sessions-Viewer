@@ -76,7 +76,7 @@ function viewSessions() {
   }
   const rows = list.map((s) => {
     const r = sessionRows(s), lead = r.length && r[0].best ? r[0] : null;
-    return { id: s.id, cells: [td(fmtDate(s.date), "b"), td(s.time, "c dim"), td(trackLabel(s.track, s.layout), "b"), td(s.type, "c dim"), td(s.weather || "", "c"), td(s.entries.length, "c"),
+    return { id: s.id, cells: [td(fmtDate(s.date), "b"), td(s.time, "c dim"), td(trackLabel(s.track, s.layout), "b"), td(s.type, "c dim"), td(s.weather || "Not set", "c" + (s.weather ? "" : " dim")), td(s.entries.length, "c"),
       td(s.entries.reduce((a, e) => a + e.laps.length, 0), "c dim"), td(lead ? fmtTime(lead.best) : "-", "c " + (lead ? "purple b" : "dim")), td(lead ? nameOf(lead.pid) : "", "dim"), td(s.server, "dim")] };
   });
   root.append(bar, list.length ? listTable(["Date", "Time", "Track", "Type", "Weather", "Drivers", "Laps", "Fastest lap", "Driver", "Server"], rows, pick, st.sel) : noData("No sessions match."), detail);
@@ -102,7 +102,7 @@ function sessionDetail(sess) {
   const best = rows.length && rows[0].best ? rows[0] : null;
   const nl = sess.entries.reduce((a, e) => a + e.laps.length, 0), nv = sess.entries.reduce((a, e) => a + e.laps.filter((l) => l[4] && l[0] > 0).length, 0);
   const chips = h("div", { class: "chips" }, chip("Session", `${sess.type || "Session"}  ·  ${fmtDate(sess.date) || "-"} ${sess.time || ""}`.trim()), chip("Track", trackLabel(sess.track, sess.layout)),
-    sess.weather ? chip("Weather", sess.weather) : null,
+    chip("Weather", sess.weather || "Not set"),
     best ? chip("Fastest lap", `${nameOf(best.pid)}  ${fmtTime(best.best)}`, cssVar("--purple")) : null,
     recChip(sess), chip("Drivers", sess.entries.length), chip("Laps", `${nv} valid of ${nl}`),
     sess.duration_min ? chip("Length", `${sess.duration_min} min`) : null);
