@@ -1,4 +1,4 @@
-# ACE Practice Laps (web viewer)
+# ACE Sessions Viewer
 
 A read-only viewer for AC EVO practice, qualifying and race sessions: sessions, tracks, drivers and head to head.
 

@@ -1,5 +1,5 @@
 "use strict";
-/* ACE Practice Laps viewer: reads the data the desktop program publishes (data/index.json and one file per session),
+/* ACE Sessions Viewer: reads the data the desktop program publishes (data/index.json and one file per session),
    or any AC EVO result files you open or drop on the page.  Read-only. */
 
 const S = { sessions: [], names: {}, style: "full", tab: "sessions", local: new Set(), note: "" };
@@ -39,7 +39,7 @@ function renderAll() {
   const styleSel = h("select", { "aria-label": "Driver names", onchange: () => { S.style = styleSel.value; try { localStorage.setItem("name_style", S.style); } catch (e) { /* storage blocked */ } recompute(); renderView(); } },
     STYLES.map(([v, t]) => option(v, t, v === S.style)));
   const bar = h("header", { class: "top" },
-    h("div", { class: "brand" }, h("img", { src: "icon.svg", alt: "", width: 30, height: 30 }), h("div", null, h("div", { class: "app", text: "ACE Practice Laps" }), h("div", { class: "cname", text: sub }))),
+    h("div", { class: "brand" }, h("img", { src: "icon.svg", alt: "", width: 30, height: 30 }), h("div", null, h("div", { class: "app", text: "ACE Sessions Viewer" }), h("div", { class: "cname", text: sub }))),
     h("div", { class: "grow" }), field("Names:", styleSel),
     h("button", { class: "btn", type: "button", text: "Open files…", title: "Show AC EVO session result files (they stay in your browser, nothing is uploaded)", onclick: () => file.click() }), file, themeToggle());
   const nav = h("nav", { class: "tabs", role: "tablist" }, TABS.map(([id, label]) => h("button", { class: "tab" + (S.tab === id ? " on" : ""), type: "button", role: "tab",
