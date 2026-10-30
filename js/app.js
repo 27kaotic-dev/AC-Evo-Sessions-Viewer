@@ -57,6 +57,13 @@ function renderView() {
   if (S.note) main.prepend(h("div", { class: "hint", text: S.note }));
   document.querySelectorAll(".tabs .tab").forEach((b, i) => { const on = TABS[i][0] === S.tab; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
 }
+/* show a session on the Sessions page (a click on a chart point / a double-click on a table row) */
+function openSession(sid) {
+  P.sessions = { track: "", type: "", weather: "", sel: sid };
+  S.tab = "sessions";
+  renderView();
+  window.scrollTo({ top: 0 });
+}
 function setTab(id) { S.tab = id; renderView(); window.scrollTo({ top: 0 }); }
 
 function emptyState() {

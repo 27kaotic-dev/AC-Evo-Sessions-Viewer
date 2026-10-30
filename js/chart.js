@@ -30,6 +30,10 @@ class LineChart {
     canvas.addEventListener("pointermove", (e) => this.onMove(e));
     canvas.addEventListener("pointerdown", (e) => this.onMove(e));
     canvas.addEventListener("pointerleave", () => this.setHover(null, null));
+    canvas.addEventListener("click", () => {                 // a point that came from a session: open that session
+      const sid = this.opt.links && this.hover !== null && this.hoverPt ? this.opt.links[this.hoverPt[0]] : null;
+      if (sid && window.openSession) window.openSession(sid);
+    });
     canvas.style.touchAction = "pan-y";
     if (window.ResizeObserver) new ResizeObserver(() => this.draw()).observe(canvas);
     this.draw();
