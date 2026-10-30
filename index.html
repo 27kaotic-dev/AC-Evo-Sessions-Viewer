@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ACE Practice Laps</title>
+  <meta name="description" content="Practice, qualifying and race sessions from AC EVO servers: tracks, drivers, records and head to head.">
+  <meta name="color-scheme" content="dark light">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <script>
+    /* set the theme before the page paints, so there is no flash */
+    try { var t = localStorage.getItem("theme"); if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/style.css?v=1">
+  <link rel="stylesheet" href="css/practice.css?v=2">
+</head>
+<body>
+  <div id="app"><p class="loading">Loading…</p></div>
+  <noscript><p class="loading">This viewer needs JavaScript.</p></noscript>
+  <script src="js/util.js?v=1"></script>
+  <script src="js/chart.js?v=3"></script>
+  <script src="js/ui.js?v=1"></script>
+  <script src="js/core.js?v=1"></script>
+  <script src="js/pages.js?v=8"></script>
+  <script src="js/app.js?v=1"></script>
+</body>
+</html>

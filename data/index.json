@@ -1,0 +1,31 @@
+{
+ "format": 1,
+ "app": "ACE Practice Laps",
+ "updated": "2026-10-30T16:27:30",
+ "sessions": [
+  {
+   "id": "da78b72bbc0d",
+   "file": "sessions/da78b72bbc0d.json",
+   "track": "Donington Park",
+   "layout": "GP",
+   "date": "2026-10-27",
+   "time": "08:05:13",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 7,
+   "laps": 96
+  },
+  {
+   "id": "d938fd9af591",
+   "file": "sessions/d938fd9af591.json",
+   "track": "Donington Park",
+   "layout": "GP",
+   "date": "2026-10-29",
+   "time": "08:02:23",
+   "type": "Practice",
+   "weather": "Dry",
+   "drivers": 15,
+   "laps": 324
+  }
+ ]
+}

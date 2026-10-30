@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#222839"/><stop offset="1" stop-color="#0f1117"/></linearGradient>
+    <clipPath id="strip"><rect x="118" y="108" width="788" height="197" rx="30"/></clipPath>
+  </defs>
+  <rect x="24" y="24" width="976" height="976" rx="210" fill="url(#bg)" stroke="#323a52" stroke-width="14"/>
+  <g clip-path="url(#strip)">
+    <rect x="118" y="108" width="788" height="197" fill="#10131b"/>
+    <g fill="#eef0f6">
+      <rect x="118" y="108" width="98.5" height="98.5"/><rect x="315.5" y="108" width="98.5" height="98.5"/><rect x="512.5" y="108" width="98.5" height="98.5"/><rect x="709.5" y="108" width="98.5" height="98.5"/>
+      <rect x="216.5" y="206.5" width="98.5" height="98.5"/><rect x="414" y="206.5" width="98.5" height="98.5"/><rect x="611" y="206.5" width="98.5" height="98.5"/><rect x="808" y="206.5" width="98" height="98.5"/>
+    </g>
+  </g>
+  <rect x="118" y="331" width="788" height="30" rx="15" fill="#ff3d4f"/>
+  <rect x="147" y="590" width="250" height="322" rx="26" fill="#c9d0de"/>
+  <rect x="387" y="471" width="250" height="441" rx="26" fill="#ffc83d"/>
+  <rect x="627" y="660" width="250" height="252" rx="26" fill="#dd8f52"/>
+  <rect x="117" y="912" width="790" height="26" rx="13" fill="#3a4262"/>
+  <g font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#10131b" fill-opacity=".85" text-anchor="middle">
+    <text x="272" y="760" font-size="150">2</text><text x="512" y="680" font-size="190">1</text><text x="752" y="810" font-size="150">3</text>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+/* the few things the practice viewer adds to the shared style sheet */
+.listwrap { max-height: 250px; overflow: auto; margin-bottom: 4px; }
+.listwrap tr.link { cursor: pointer; }
+td.it, .it { font-style: italic; }
+.toolbar select { max-width: 100%; }
+
+.found { padding: 14px 8px; display: flex; flex-direction: column; gap: 8px; }
+.frow { display: grid; grid-template-columns: 170px 1fr 340px; align-items: center; gap: 12px; }
+.fname { text-align: right; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ftrack { background: rgba(128,128,128,.15); border-radius: 3px; height: 18px; display: block; }
+.fbar { display: block; height: 100%; border-radius: 3px; opacity: .72; }
+.frow:hover .fbar { opacity: .95; }
+.fval { opacity: .7; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 760px) { .frow { grid-template-columns: 90px 1fr; } .fval { grid-column: 1 / -1; } }
