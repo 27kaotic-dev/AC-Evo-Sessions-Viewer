@@ -363,13 +363,6 @@
    "author": "Will Pittenger"
   },
   {
-   "circuit": "Paul Ricard",
-   "layout": "",
-   "file": "maps/paulricard-x.svg",
-   "licence": "CC0",
-   "author": "HumanBodyPiloter5"
-  },
-  {
    "circuit": "Red Bull Ring",
    "layout": "GP",
    "file": "maps/redbullring-gp.svg",
@@ -424,6 +417,41 @@
    "file": "maps/watkinsglen-short.svg",
    "licence": "CC BY-SA 4.0",
    "author": "Stl66dmk"
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "1C-V2",
+   "file": "maps/circuitpaulricard-1cv2.svg",
+   "licence": "CC0",
+   "author": "HumanBodyPiloter5"
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "1A-V2",
+   "file": "maps/circuitpaulricard-1av2.svg",
+   "licence": "CC0",
+   "author": "HumanBodyPiloter5"
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "3D",
+   "file": "maps/circuitpaulricard-3d.png",
+   "licence": "CC BY-SA 3.0",
+   "author": "Joey01"
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "1D",
+   "file": "maps/circuitpaulricard-1d.svg",
+   "licence": "Public domain",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "Short Grand Prix",
+   "file": "maps/circuitpaulricard-shortgrandprix.png",
+   "licence": "CC BY-SA 4.0",
+   "author": "JPDurzel"
   }
  ]
 }
