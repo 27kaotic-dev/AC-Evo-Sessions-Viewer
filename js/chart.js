@@ -153,7 +153,7 @@ class LineChart {
       g.strokeStyle = col; g.lineWidth = i === hov ? 3 : 2;
       if (!o.dots) {
         g.beginPath();
-        s.pts.forEach(([x, y], j) => (j ? g.lineTo(mx(x), my(y)) : g.moveTo(mx(x), my(y))));
+        s.pts.forEach(([x, y], j) => (j && !LineChart.broken(s, s.pts[j - 1][0], x) ? g.lineTo(mx(x), my(y)) : g.moveTo(mx(x), my(y))));
         g.stroke();
       }
       if (o.dots || s.pts.length <= 40 || i === hov) {
@@ -212,6 +212,9 @@ class LineChart {
     return s + "…";
   }
 
+  /* is a left-out x (the series' gaps) between these two points? then no line is drawn between them */
+  static broken(s, x1, x2) { return !!s.gaps && s.gaps.some((v) => v > x1 && v < x2); }
+
   static segDist(px, py, a, b) {
     const dx = b[0] - a[0], dy = b[1] - a[1];
     if (dx === 0 && dy === 0) return Math.hypot(px - a[0], py - a[1]);
@@ -229,7 +232,8 @@ class LineChart {
     let best = 9, found = null;
     this.series.forEach((s, i) => {
       const q = s.pts.map(([x, y]) => [g.mx(x), g.my(y)]);
-      const segs = q.length > 1 && !this.opt.dots ? q.slice(1).map((b, k) => [q[k], b]) : q.map((a) => [a, a]);
+      let segs = q.length > 1 && !this.opt.dots ? q.slice(1).map((b, k) => [q[k], b]) : q.map((a) => [a, a]);
+      if (q.length > 1 && !this.opt.dots) segs = segs.filter((_, k) => !LineChart.broken(s, s.pts[k][0], s.pts[k + 1][0]));
       for (const [a, b] of segs) {
         const d = LineChart.segDist(px, py, a, b);
         if (d < best) { best = d; found = i; }

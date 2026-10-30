@@ -111,11 +111,11 @@ function sessionDetail(sess) {
     { title: "Laps", make: () => tLaps(rows, sess) },
     { title: "Sectors / Ideal Lap", make: () => tSectors(rows) },
     { title: "Consistency", make: () => tCons(rows) },
-    { title: "Lap times", make: () => lineBox(rows.map((r) => ({ label: nameOf(r.pid), color: colorOf(r.pid),
-      pts: r.e.laps.map((l, i) => [i + 1, l[0], l]).filter(([, , l]) => l[4] && l[0] > 0).map(([x, y]) => [x, y]) })).filter((s) => s.pts.length), { clip: true },
-      "Every valid lap, lap by lap; the axis is cut off at slow laps (in / out laps, spins).") },
-    { title: "Best lap progress", make: () => lineBox(rows.map((r) => { let run = 0; const pts = []; r.e.laps.forEach((l, i) => { if (l[4] && l[0] > 0 && (!run || l[0] < run)) { run = l[0]; pts.push([i + 1, run]); } }); return { label: nameOf(r.pid), color: colorOf(r.pid), pts }; }).filter((s) => s.pts.length), {},
-      "Each point is a lap that was a new best for that driver, joined by a line: the steps down show when they found time.") },
+    { title: "Lap times", make: () => lineBox(rows.map((r) => { const out = lapOutliers(r.e.laps); return { label: nameOf(r.pid), color: colorOf(r.pid), gaps: [...out],
+      pts: r.e.laps.map((l, i) => [i + 1, l[0], l]).filter(([n, , l]) => l[4] && l[0] > 0 && !out.has(n)).map(([x, y]) => [x, y]) }; }).filter((s) => s.pts.length), {},
+      "Every valid lap, lap by lap. A lap more than 7% away from the driver's median lap (in / out laps, spins) is left out and shows as a gap in the line.") },
+    { title: "Best lap progress", make: () => lineBox(rows.map((r) => { const out = lapOutliers(r.e.laps); let run = 0; const pts = []; r.e.laps.forEach((l, i) => { if (l[4] && l[0] > 0 && !out.has(i + 1) && (!run || l[0] < run)) { run = l[0]; pts.push([i + 1, run]); } }); return { label: nameOf(r.pid), color: colorOf(r.pid), pts }; }).filter((s) => s.pts.length), {},
+      "Each point is a lap that was a new best for that driver, joined by a line: the steps down show when they found time. Laps more than 7% away from the driver's median lap are not counted.") },
     { title: "Time found", make: () => tFound(rows) },
     { title: "Cuts / incidents", make: () => tIncidents(rows) },
   ], 0, "session");
@@ -396,8 +396,9 @@ function viewH2h() {
     const sess = ss.find((x) => x.id === selSess.v);
     if (!sess) return noData("Pick a session in the Sessions together tab.");
     const series = [[st.a, H2H_A], [st.b, H2H_B]].map(([pid, col]) => { const e = sess.entries.find((q) => q.pid === pid);
-      return { label: nameOf(pid), color: col, pts: e ? e.laps.map((l, i) => [i + 1, l[0], l]).filter(([, , l]) => l[4] && l[0] > 0).map(([x, y]) => [x, y]) : [] }; }).filter((q) => q.pts.length);
-    return lineBox(series, { clip: true }, `Every valid lap of the session on ${fmtDate(sess.date)}.`, 380);
+      const out = e ? lapOutliers(e.laps) : new Set();
+      return { label: nameOf(pid), color: col, gaps: [...out], pts: e ? e.laps.map((l, i) => [i + 1, l[0], l]).filter(([n, , l]) => l[4] && l[0] > 0 && !out.has(n)).map(([x, y]) => [x, y]) : [] }; }).filter((q) => q.pts.length);
+    return lineBox(series, {}, `Every valid lap of the session on ${fmtDate(sess.date)}. A lap more than 7% away from the driver's median lap is left out and shows as a gap.`, 380);
   }
   function lowerProgress() {
     const here = ss.filter((x) => trackKey(x.track, x.layout) === selTrack.v), xl = {}, links = {};
