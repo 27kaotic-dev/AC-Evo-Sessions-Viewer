@@ -2,13 +2,15 @@
 /* Small building blocks shared by the pages: sub tabs, chips, sizeable tables.  (Same as the championship viewer.) */
 
 /* ---------------------------------------------------------------- small building blocks */
-function tabset(items, start = 0) {
+const TABMEM = {};      // the sub-tab last open per page, so picking another session / track / driver stays on it
+function tabset(items, start = 0, key = "") {
   const bar = h("div", { class: "subtabs", role: "tablist" });
   const body = h("div", { class: "subbody" });
   const panes = [], btns = [];
   let cur = -1;
   function show(i) {
     cur = i;
+    if (key) TABMEM[key] = i;
     btns.forEach((b, k) => { b.classList.toggle("on", k === i); b.setAttribute("aria-selected", k === i); });
     items.forEach((it, k) => {
       if (k === i && !panes[k]) { panes[k] = h("div", { class: "pane" }, it.make()); body.append(panes[k]); }
@@ -19,7 +21,7 @@ function tabset(items, start = 0) {
     const b = h("button", { class: "subtab", type: "button", role: "tab", onclick: () => show(i) }, it.title);
     btns.push(b); bar.append(b);
   });
-  show(Math.max(0, Math.min(start, items.length - 1)));
+  show(Math.max(0, Math.min(key && TABMEM[key] !== undefined ? TABMEM[key] : start, items.length - 1)));
   return { el: h("div", { class: "tabset" }, bar, body), show, get index() { return cur; } };
 }
 

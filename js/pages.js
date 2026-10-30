@@ -116,7 +116,7 @@ function sessionDetail(sess) {
       "Each point is a lap that was a new best for that driver, joined by a line: the steps down show when they found time.") },
     { title: "Time found", make: () => tFound(rows) },
     { title: "Cuts / incidents", make: () => tIncidents(rows) },
-  ]);
+  ], 0, "session");
   return h("div", { class: "session" }, chips, tabs.el);
 }
 
@@ -267,7 +267,7 @@ function viewTracks() {
         const pts = statsHistory(sw, x.tkey, car).filter((p) => !since || p.date >= since);
         if (!pts.length) return noData("No laps for this choice (try another car or period).");
         let low = 0; const run = [], rec = [], xl = {};
-        pts.forEach((p, i) => { low = !low || p.best < low ? p.best : low; run.push([i + 1, p.best]); rec.push([i + 1, low]); xl[i + 1] = p.date; });
+        pts.forEach((p, i) => { low = !low || p.best < low ? p.best : low; run.push([i + 1, p.best]); rec.push([i + 1, low]); xl[i + 1] = fmtDate(p.date); });
         return lineBox([{ label: "Fastest lap of the session", color: DRIVER_COLORS[1], pts: run }, { label: "Track record", color: DRIVER_COLORS[0], pts: rec }], { xlabels: xl },
           "Left to right = the sessions at this track, oldest first (labelled with their date). Blue = the fastest valid lap of each session  ·  red = the track record so far.");
       } },
@@ -283,7 +283,7 @@ function viewTracks() {
         const r = sessionRows(s), lead = r.length && r[0].best ? r[0] : null;
         return h("tr", null, td(fmtDate(s.date), "b"), td(s.time, "c dim"), td(s.type, "c dim"), td(s.entries.length, "c"), td(lead ? fmtTime(lead.best) : "-", "r " + (lead ? "purple b" : "dim")), td(lead ? nameOf(lead.pid) : "", "dim"));
       })) },
-    ], S.trackTab || 0);
+    ], 0, "track");
     detail.append(bar, topRow, tabs.el);
   }
   root.append(detail);
@@ -326,7 +326,7 @@ function viewDrivers() {
           clear(holder);
           const r = have.find((x) => x.tkey === sel.value) || have[0];
           let low = 0; const pts = [], run = [], xl = {};
-          r.series.forEach((p, i) => { low = !low || p.best < low ? p.best : low; pts.push([i + 1, p.best]); run.push([i + 1, low]); xl[i + 1] = p.date; });
+          r.series.forEach((p, i) => { low = !low || p.best < low ? p.best : low; pts.push([i + 1, p.best]); run.push([i + 1, low]); xl[i + 1] = fmtDate(p.date); });
           holder.append(lineBox([{ label: "Best lap of the session", color: DRIVER_COLORS[1], pts }, { label: "Best so far", color: DRIVER_COLORS[0], pts: run }], { xlabels: xl },
             "Blue = the driver's best lap of each session at this track, red = their best so far (their personal record coming down). Left to right = their sessions there, oldest first."));
         }
@@ -340,7 +340,7 @@ function viewDrivers() {
           td(r.pos ? `${r.pos} of ${s.entries.length}` : "-", "c " + (r.pos && r.pos <= 3 ? medalClass(r.pos) : "dim")), td(r.best ? fmtTime(r.best) : "-", "r"), td(r.gap ? fmtGap(r.gap) : "", "r dim"),
           td(r.st.laps, "c dim"), td(r.st.valid, "c dim"), td(r.st.cons ? r.st.cons.toFixed(1) : "", "c dim"), td(r.car, "dim"))));
       } },
-    ]);
+    ], 0, "driver");
     detail.append(pickerBar(h("span", { class: "grow" }), csvButton(() => visibleTable(detail), () => `${nameOf(pid)}_tracks`)), chips, tabs.el);
   }
   drawDetail();
@@ -399,7 +399,7 @@ function viewH2h() {
   }
   function lowerProgress() {
     const here = ss.filter((x) => trackKey(x.track, x.layout) === selTrack.v), xl = {};
-    here.forEach((x, i) => { xl[i + 1] = x.date; });
+    here.forEach((x, i) => { xl[i + 1] = fmtDate(x.date); });
     const series = [[st.a, H2H_A], [st.b, H2H_B]].map(([pid, col]) => { const pts = [];
       here.forEach((x, i) => { const e = x.entries.find((q) => q.pid === pid); const l = e ? lapStats(e.laps) : null; if (l && l.best) pts.push([i + 1, l.best]); });
       return { label: nameOf(pid), color: col, pts }; }).filter((q) => q.pts.length);
