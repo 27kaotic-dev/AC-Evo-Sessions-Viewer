@@ -51,6 +51,11 @@ function outlierPicker(onchange) {
   return selectOf("Show laps:", LAP_FILTERS.some(([k]) => k === cur) ? cur : "0.1", LAP_FILTERS,
     (v) => { try { localStorage.setItem("lap_outlier", v); } catch (e) { /* storage blocked */ } onchange(); });
 }
+function weatherCell(s) {
+  const c = td(s.weather || "Not set", "c" + (s.weather ? "" : " dim"));
+  if (WEATHER_API) { c.classList.add("wxcell"); c.title = "Click to set the weather (PIN needed)"; c.addEventListener("click", (e) => { e.stopPropagation(); weatherEditor(s, c); }); }
+  return c;
+}
 function pickerBar(...kids) { return h("div", { class: "toolbar" }, kids); }
 const WEATHERS = [["", "All weather"], ["Dry", "Dry"], ["Damp", "Damp"], ["Wet", "Wet"], ["Mixed", "Mixed"], ["-", "Not set"]];
 const weatherOk = (s, w) => !w || (w === "-" ? !s.weather : s.weather === w);
@@ -62,6 +67,37 @@ const csvButton = (getTable, name) => h("button", { class: "btn", type: "button"
   onclick: () => { const t = getTable(); if (t) downloadCsv(slug(name()), t); } });
 function visibleTable(root) { return [...root.querySelectorAll(".pane:not([hidden]) table, table")].find((t) => t.offsetParent && !t.closest(".listwrap")); }
 function noData(text) { return h("div", { class: "empty", text }); }
+
+/* ---------------------------------------------------------------- weather editor (click a weather cell; the PIN is asked once per tab) */
+function closeWeatherEditor() { document.querySelectorAll(".wxpop").forEach((e) => e.remove()); }
+function weatherEditor(sess, cell) {
+  closeWeatherEditor();
+  let pin = ""; try { pin = sessionStorage.getItem("weather_pin") || ""; } catch (e) { /* storage blocked */ }
+  const sel = h("select", { "aria-label": "Weather" }, [["", "Not set"], ["Dry", "Dry"], ["Damp", "Damp"], ["Wet", "Wet"], ["Mixed", "Mixed"]].map(([v, t]) => option(v, t, v === (sess.weather || ""))));
+  const pinBox = h("input", { type: "password", placeholder: "PIN", autocomplete: "off", "aria-label": "PIN", value: pin });
+  const msg = h("div", { class: "hint" });
+  const save = h("button", { class: "btn", type: "button", text: "Save", onclick: async () => {
+    msg.textContent = "Saving…"; save.disabled = true;
+    try {
+      const r = await fetch(WEATHER_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin: pinBox.value, id: sess.id, weather: sel.value }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { msg.textContent = j.error || `Could not save (${r.status})`; save.disabled = false; if (r.status === 403) { try { sessionStorage.removeItem("weather_pin"); } catch (e) { /* ignore */ } } return; }
+      try { sessionStorage.setItem("weather_pin", pinBox.value); } catch (e) { /* storage blocked */ }
+      sess.weather = sel.value;
+      closeWeatherEditor();
+      renderView();
+    } catch (e) { msg.textContent = "Could not reach the server"; save.disabled = false; }
+  } });
+  const pop = h("div", { class: "wxpop" }, h("div", { class: "wxt", text: `Weather: ${trackLabel(sess.track, sess.layout)}, ${fmtDate(sess.date)}` }), sel, pin ? null : pinBox,
+    h("div", { class: "wxrow" }, save, h("button", { class: "btn", type: "button", text: "Cancel", onclick: closeWeatherEditor })), msg);
+  if (pin) pop.append(h("a", { class: "wxlink", href: "#", text: "Use a different PIN", onclick: (e) => { e.preventDefault(); try { sessionStorage.removeItem("weather_pin"); } catch (x) { /* ignore */ } weatherEditor(sess, cell); } }));
+  document.body.append(pop);
+  const r = cell.getBoundingClientRect();
+  pop.style.top = Math.min(window.scrollY + r.bottom + 4, window.scrollY + window.innerHeight - 200) + "px";
+  pop.style.left = Math.max(8, Math.min(window.scrollX + r.left, window.scrollX + window.innerWidth - 270)) + "px";
+  (pin ? sel : pinBox).focus();
+}
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeWeatherEditor(); });
 
 /* ---------------------------------------------------------------- sessions */
 function viewSessions() {
@@ -84,7 +120,7 @@ function viewSessions() {
   }
   const rows = list.map((s) => {
     const r = sessionRows(s), lead = r.length && r[0].best ? r[0] : null;
-    return { id: s.id, cells: [td(fmtDate(s.date), "b"), td(s.time, "c dim"), td(trackLabel(s.track, s.layout), "b"), td(s.type, "c dim"), td(s.weather || "Not set", "c" + (s.weather ? "" : " dim")), td(s.entries.length, "c"),
+    return { id: s.id, cells: [td(fmtDate(s.date), "b"), td(s.time, "c dim"), td(trackLabel(s.track, s.layout), "b"), td(s.type, "c dim"), weatherCell(s), td(s.entries.length, "c"),
       td(s.entries.reduce((a, e) => a + e.laps.length, 0), "c dim"), td(lead ? fmtTime(lead.best) : "-", "c " + (lead ? "purple b" : "dim")), td(lead ? nameOf(lead.pid) : "", "dim"), td(s.server, "dim")] };
   });
   root.append(bar, list.length ? listTable(["Date", "Time", "Track", "Type", "Weather", "Drivers", "Laps", "Fastest lap", "Driver", "Server"], rows, pick, st.sel) : noData("No sessions match."), detail);

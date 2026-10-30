@@ -57,6 +57,9 @@ function renderView() {
   if (S.note) main.prepend(h("div", { class: "hint", text: S.note }));
   document.querySelectorAll(".tabs .tab").forEach((b, i) => { const on = TABS[i][0] === S.tab; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
 }
+/* where the weather of a session is saved from this page (the Cloudflare Worker, behind a PIN); "" = editing is switched off */
+const WEATHER_API = "https://acevo-results.27-kaotic.workers.dev/weather";
+
 /* show a session on the Sessions page (a click on a chart point / a double-click on a table row) */
 function openSession(sid) {
   P.sessions = { track: "", type: "", weather: "", sel: sid };
