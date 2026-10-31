@@ -175,7 +175,7 @@ const gapLabel = (gap, best, km) => { const m = gapMetres(gap, best, km); return
 function barCell(lanes, mx, label, tip, stack) {
   if (!stack && !(lanes.length && lanes[0][0] > 0)) return h("td", { class: "barcell" });
   const tot = stack ? lanes.reduce((a, l) => a + Math.max(l[0], 0), 0) : lanes[0][0];
-  const parts = stack ? lanes.map(([v, c]) => h("span", { style: { width: `calc(0.5cm + (100% - ${lanes.length * 0.5}cm) * ${Math.max(v, 0) / mx})`, background: c } })) : [];
+  const parts = stack ? lanes.map(([v, c]) => h("span", { style: { flex: `${Math.max(v, 0)} 0 0.5cm`, background: c } })) : [];
   return h("td", { class: "barcell", title: tip || null }, h("span", { class: "ltrack" },
     h("span", { class: "cbar" + (stack ? " stack" : ""), style: { width: stack ? "calc(" + lanes.length * 0.5 + "cm + (100% - " + lanes.length * 0.5 + "cm) * " + (tot / mx) + ")" : Math.min(100, 100 * tot / mx) + "%", background: stack ? null : lanes[0][1] } }, parts, !stack && label ? h("em", { text: label, class: 100 * tot / mx < 20 ? "out" : "" }) : null)));
 }
