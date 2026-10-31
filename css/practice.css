@@ -8,7 +8,17 @@ td.it, .it { font-style: italic; }
 .frow { display: grid; grid-template-columns: 170px 1fr 340px; align-items: center; gap: 12px; }
 .fname { text-align: right; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ftrack { background: rgba(128,128,128,.15); border-radius: 3px; height: 18px; display: block; }
-.fbar { display: block; height: 100%; border-radius: 3px; opacity: .72; }
+.fbar { display: block; height: 100%; opacity: .72; }
+.ftrack { display: flex; overflow: hidden; }
+td.barcell { min-width: 300px; padding: 3px 8px; }
+.ltrack { display: block; height: 26px; }
+.cbar { display: flex; height: 100%; min-width: 4px; border-radius: 5px; opacity: .88; position: relative; }
+.cbar.stack { min-width: 1.5cm; overflow: hidden; }
+.cbar.stack > span { display: block; height: 100%; flex: none; position: relative; }
+.cbar > em { position: absolute; left: 9px; top: 0; bottom: 0; display: flex; align-items: center; font-style: normal; font-size: 12px; color: #12151c; white-space: nowrap; }
+.cbar > em.out { left: 100%; margin-left: 6px; color: inherit; opacity: .85; }
+.glegend { display: flex; gap: 18px; flex-wrap: wrap; padding: 0 0 4px 182px; font-size: 12px; opacity: .8; }
+.glegend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
 .frow:hover .fbar { opacity: .95; }
 .fval { opacity: .7; font-variant-numeric: tabular-nums; white-space: nowrap; }
 @media (max-width: 760px) { .frow { grid-template-columns: 90px 1fr; } .fval { grid-column: 1 / -1; } }

@@ -131,6 +131,26 @@ function lapOutliers(laps, pct = OUTLIER) {
   return out;
 }
 
+/* split one driver's laps into runs -> { runs, slow }: a run ends at a lap much slower than the driver's median valid lap (an in / out lap), runs shorter
+   than minLaps are joined to their neighbour. slow = Set of lap numbers (1 = first) left out. run = { first, last, laps, valid, avg, best } */
+function sessionRuns(laps, pct = OUTLIER, minLaps = 3) {
+  const t = laps.filter((l) => l[4] && l[0] > 0).map((l) => l[0]).sort((a, b) => a - b), n = t.length;
+  if (n < 2) return { runs: [], slow: new Set() };
+  const med = n % 2 ? t[(n - 1) / 2] : (t[n / 2 - 1] + t[n / 2]) / 2, lim = med * (1 + (pct || OUTLIER)), slow = new Set();
+  laps.forEach((l, i) => { if (l[0] <= 0 || l[0] > lim) slow.add(i + 1); });
+  const groups = []; let cur = [];
+  for (let i = 1; i <= laps.length; i++) { if (slow.has(i)) { if (cur.length) { groups.push(cur); cur = []; } } else cur.push(i); }
+  if (cur.length) groups.push(cur);
+  for (let i = 0; i < groups.length;) {
+    if (groups[i].length < minLaps && groups.length > 1) { if (i) groups[i - 1] = groups[i - 1].concat(groups.splice(i, 1)[0]); else groups.splice(0, 2, groups[0].concat(groups[1])); continue; }
+    i++;
+  }
+  const runs = [];
+  groups.forEach((g) => { const v = g.map((k) => laps[k - 1]).filter((l) => l[4] && l[0] > 0).map((l) => l[0]);
+    if (v.length) runs.push({ first: g[0], last: g[g.length - 1], laps: g, valid: v.length, avg: v.reduce((a, b) => a + b, 0) / v.length, best: Math.min(...v) }); });
+  return { runs, slow };
+}
+
 function lapStats(laps) {
   const valid = laps.filter((l) => l[4] && l[0] > 0);
   const out = { laps: laps.length, valid: valid.length, best: 0, best_lap: 0, sectors: [0, 0, 0], ideal: 0, avg: 0, sd: 0, cons: 0, counted: 0 };
@@ -254,6 +274,35 @@ function statsDrivers(sessions) {
   const out = [...d.values()].map((x) => { x.sessions = x._s.size; x.tracks = x._t.size; delete x._s; delete x._t; x.records = records.get(x.pid) || 0; return x; });
   out.sort((a, b) => cmpT([-a.records, -a.sessions, a.pid], [-b.records, -b.sessions, b.pid]));
   return out;
+}
+
+/* one driver's sessions, oldest first: laps, cuts, pit speeding, collisions, consistency, km, and how far off the track record their best lap is (in %) */
+function statsForm(sessions, pid) {
+  const rec = new Map(), out = [];
+  for (const s of sortedSessions(sessions)) {
+    const k = trackKey(s.track, s.layout);
+    for (const e of s.entries) {
+      if (e.pid !== pid) continue;
+      if (!rec.has(k)) { const b = statsBoard(sessions, k); rec.set(k, b.length && b[0].best ? b[0].best : 0); }
+      const st = lapStats(e.laps), r = rec.get(k), pens = e.pens || [];
+      out.push({ sid: s.id, date: s.date, tkey: k, track: s.track, layout: s.layout, car: e.car, laps: st.laps, valid: st.valid,
+        cuts: pens.filter((p) => p[0] === "cut").length, spd: pens.filter((p) => p[0] === "pit speeding").length, hits: (e.hits || [0])[0] || 0,
+        cons: st.cons, best: st.best, km: e.km || 0, sec: st.sectors.slice(), ideal: st.ideal, avg: st.avg, off: st.best && r ? (st.best - r) / r * 100 : null });
+    }
+  }
+  return out;
+}
+
+/* for each track: where the driver's best sector 1, 2 and 3 ranks among everyone's best sectors there -> [{ tkey, res: [[rank, of, gap_ms] x3] }] */
+function statsStrength(sessions, pid, tkeys) {
+  return tkeys.map((k) => {
+    const board = statsBoard(sessions, k), mine = board.find((r) => r.pid === pid);
+    const res = [0, 1, 2].map((i) => {
+      const have = board.map((r) => r.sectors[i]).filter((x) => x).sort((a, b) => a - b), v = mine ? mine.sectors[i] : 0;
+      return v && have.length ? [have.indexOf(v) + 1, have.length, v - have[0]] : [0, have.length, 0];
+    });
+    return { tkey: k, res };
+  });
 }
 
 function statsCareer(sessions, pid) {

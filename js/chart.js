@@ -31,7 +31,8 @@ class LineChart {
     canvas.addEventListener("pointerdown", (e) => this.onMove(e));
     canvas.addEventListener("pointerleave", () => this.setHover(null, null));
     canvas.addEventListener("click", () => {                 // a point that came from a session: open that session
-      const sid = this.opt.links && this.hover !== null && this.hoverPt ? this.opt.links[this.hoverPt[0]] : null;
+      const L = this.opt.links, m = Array.isArray(L) ? L[this.hover] : L;        // one map per line, or one for all
+      const sid = m && this.hover !== null && this.hoverPt ? m[this.hoverPt[0]] : null;
       if (sid && window.openSession) window.openSession(sid);
     });
     canvas.style.touchAction = "pan-y";

@@ -45,7 +45,7 @@ function renderAll() {
   const nav = h("nav", { class: "tabs", role: "tablist" }, TABS.map(([id, label]) => h("button", { class: "tab" + (S.tab === id ? " on" : ""), type: "button", role: "tab",
     "aria-selected": S.tab === id, onclick: () => setTab(id), text: label })));
   const main = h("main", { id: "view" });
-  app.append(bar, S.sessions.length ? nav : null, main, h("footer", { class: "foot" }, "Read-only viewer. Made with ACE Practice Laps."));
+  app.append(bar, S.sessions.length ? nav : null, main, h("footer", { class: "foot" }, "Read-only viewer. Made with ACEVO Results Viewer."));
   if (S.sessions.length) renderView(); else main.append(emptyState());
 }
 
@@ -118,6 +118,7 @@ async function boot() {
     const items = index && Array.isArray(index.sessions) ? index.sessions.filter((x) => x && typeof x.file === "string" && /^[\w./-]+\.json$/.test(x.file) && !x.file.includes("..")) : [];
     const loaded = await Promise.all(items.map((x) => fetch("data/" + x.file, { cache: "no-cache" }).then((q) => (q.ok ? q.json() : null)).catch(() => null)));
     S.maps = index && Array.isArray(index.maps) ? index.maps.filter((m) => m && /^maps\/[\w-]+\.(svg|png)$/.test(m.file)) : [];
+    S.lengths = index && Array.isArray(index.lengths) ? index.lengths.filter((m) => m && Number(m.km) > 0) : [];
     S.sessions = loaded.filter((s) => s && s.id && Array.isArray(s.entries) && s.drivers);
   } catch (e) { /* no data folder: the page still works with opened files */ }
   recompute();
