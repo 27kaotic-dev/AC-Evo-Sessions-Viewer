@@ -1,7 +1,7 @@
 {
  "format": 1,
  "app": "ACE Practice Laps",
- "updated": "2026-10-31T16:06:29",
+ "updated": "2026-10-31T19:53:19",
  "sessions": [
   {
    "id": "0e6f487092f1",
@@ -365,6 +365,20 @@
    "drivers": 1,
    "laps": 2,
    "fp": "64d9449b2d75",
+   "cloud": true
+  },
+  {
+   "id": "06c26fabd110",
+   "file": "sessions/06c26fabd110.json",
+   "track": "Red Bull Ring",
+   "layout": "GP",
+   "date": "2026-11-01",
+   "time": "08:53:17",
+   "type": "Practice",
+   "weather": "",
+   "drivers": 1,
+   "laps": 4,
+   "fp": "ba7f0d174e37",
    "cloud": true
   }
  ],
