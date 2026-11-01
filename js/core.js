@@ -293,6 +293,17 @@ function statsForm(sessions, pid) {
   return out;
 }
 
+/* the straight line through [x, y] points (least squares) -> its two end points, or [] with fewer than 3 points */
+function trendLine(pts) {
+  const n = pts.length;
+  if (n < 3) return [];
+  const mx = pts.reduce((a, p) => a + p[0], 0) / n, my = pts.reduce((a, p) => a + p[1], 0) / n;
+  const den = pts.reduce((a, p) => a + (p[0] - mx) ** 2, 0);
+  if (!den) return [];
+  const k = pts.reduce((a, p) => a + (p[0] - mx) * (p[1] - my), 0) / den, x0 = pts[0][0], x1 = pts[n - 1][0];
+  return [[x0, my + k * (x0 - mx)], [x1, my + k * (x1 - mx)]];
+}
+
 /* for each track: where the driver's best sector 1, 2 and 3 ranks among everyone's best sectors there -> [{ tkey, res: [[rank, of, gap_ms] x3] }] */
 function statsStrength(sessions, pid, tkeys) {
   return tkeys.map((k) => {

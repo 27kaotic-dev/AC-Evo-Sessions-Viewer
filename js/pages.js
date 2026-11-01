@@ -233,6 +233,16 @@ function runsSvg(laps, runs, slow) {
   for (let lap = sx; lap <= n; lap += sx) svg.append(el("text", { x: x(lap), y: H - B + 18, "font-size": 11, "text-anchor": "middle", fill: "currentColor", "fill-opacity": ".6" }, String(lap)));
   return svg;
 }
+/* the key of the runs chart */
+function runsKey() {
+  const NS = "http://www.w3.org/2000/svg", ico = (inner) => { const s = document.createElementNS(NS, "svg"); s.setAttribute("width", 20); s.setAttribute("height", 14); s.setAttribute("viewBox", "0 0 20 14"); s.innerHTML = inner; return s; };
+  const items = [
+    [ico('<circle cx="10" cy="7" r="4" fill="currentColor"/>'), "Valid lap"],
+    [ico('<path d="M6.5 3.5l7 7m0 -7l-7 7" stroke="#ff6b81" stroke-width="1.8"/>'), "Invalid lap"],
+    [ico('<circle cx="10" cy="7" r="3.5" fill="none" stroke="currentColor" stroke-opacity=".55"/>'), "Slow / Outlap (ends run)"],
+    [ico('<line x1="1" x2="19" y1="7" y2="7" stroke="#4f8ef7" stroke-width="2" stroke-dasharray="5 4"/>'), "Average lap of the run"]];
+  return h("div", { class: "rkey" }, items.map(([i, t]) => h("span", null, i, t)));
+}
 function tRuns(rows) {
   const have = rows.filter((r) => r.st.valid >= 2);
   if (!have.length) return noData("No driver has two valid laps yet");
@@ -246,7 +256,7 @@ function tRuns(rows) {
     const trs = runs.map((x, k) => { const d = prev ? x.best - prev : 0; prev = x.best;
       return h("tr", null, h("td", { class: "c b", style: { color: RUN_COLORS[k % RUN_COLORS.length] }, text: "Run " + (k + 1) }), td(x.last > x.first ? `${x.first} to ${x.last}` : x.first, "c"), td(`${x.valid} of ${x.laps.length}`, "c dim"),
         td(fmtTime(x.avg), "r"), td(fmtTime(x.best), "r " + pc(x.best === best, "purple b")), h("td", { class: "r", style: { color: d < 0 ? "var(--green, #3ddc84)" : null, opacity: d < 0 ? 1 : .6 }, text: d ? (d < 0 ? "-" : "+") + (Math.abs(d) / 1000).toFixed(3) + " s" : "" })); });
-    holder.append(runs.length ? h("div", { class: "chartwrap" }, runsSvg(r.e.laps, runs, slow)) : noData("This driver needs two valid laps"),
+    holder.append(runs.length ? h("div", { class: "chartwrap" }, runsKey(), runsSvg(r.e.laps, runs, slow)) : noData("This driver needs two valid laps"),
       table(["Run", "Laps", "Valid", "Average lap", "Best lap", "Best vs previous run"], trs),
       h("div", { class: "hint", text: "A run ends at a slow lap (a pit, cool-down or out lap or a mistake: a lap further from the driver's median lap than the Show laps choice, shown as a ring at the bottom) and runs shorter than 3 laps are joined to their neighbour. White dot = valid lap, red x = a lap the game did not count, dashed line = the run's average. Hover a lap for its time." }));
   }
@@ -507,7 +517,7 @@ function viewDrivers() {
           const fs = form.filter((f) => f.tkey === sel.value && f.sec.every((x) => x)), pb = [0, 1, 2].map((k) => Math.min(...fs.map((f) => f.sec[k])));
           const xl = Object.fromEntries(fs.map((f, i) => [i + 1, fmtDate(f.date)])), lk = Object.fromEntries(fs.map((f, i) => [i + 1, f.sid]));
           holder.append(lineBox([0, 1, 2].map((k) => ({ label: "Sector " + (k + 1), color: SECTOR_COLORS[k], pts: fs.map((f, i) => [i + 1, (f.sec[k] - pb[k]) / 1000]) })),
-            { xlabels: xl, links: [lk, lk, lk], yfmt: (v) => v.toFixed(2) + " s", unit: 0.1, zero: true },
+            { xlabels: xl, links: [lk, lk, lk], yfmt: (v) => v.toFixed(2) + " s", unit: 0.1, zero: true, bigdots: true },
             "The driver's best sector 1 (blue), 2 (orange) and 3 (green) of each session at this track, as the time behind their own best sector ever (0 = their personal best). A sector that stays high has stopped improving. Left to right = their sessions there, oldest first." + CLICK_HINT, 300));
         }
         wrap.append(pickerBar(field("Track:", sel)), holder); draw();
@@ -546,11 +556,12 @@ function viewDrivers() {
         const valid = form.map((f, i) => [i + 1, f.laps ? 100 * f.valid / f.laps : null]).filter((p) => p[1] !== null);
         const inc = form.map((f, i) => [i + 1, f.laps ? 100 * (f.cuts + f.spd + f.hits) / f.laps : null]).filter((p) => p[1] !== null);
         return h("div", null, formChart([{ label: "Valid laps", color: DRIVER_COLORS[3], pts: valid }], (v) => v.toFixed(0) + "%", 5, false, "Valid laps: the % of the laps driven that the game counted. Higher is cleaner."),
-          formChart([{ label: "Incidents per 100 laps", color: DRIVER_COLORS[0], pts: inc }], (v) => String(+v.toFixed(1)), 1, true, "Incidents per 100 laps: track cuts, pit speeding and collisions. Lower is cleaner."));
+          formChart([{ label: "Incidents per 100 laps", color: DRIVER_COLORS[0], pts: inc }], (v) => String(+v.toFixed(1)), 1, true, "Incidents per 100 laps: track cuts + pit speeding + collisions, divided by the laps driven, x 100. Lower is cleaner."));
       } },
       { title: "Consistency", make: () => {
         const pts = form.map((f, i) => [i + 1, f.cons]).filter((p) => p[1]);
-        return pts.length ? formChart([{ label: "Consistency", color: DRIVER_COLORS[2], pts }], (v) => v.toFixed(0), 5, false, "Consistency score of each session (out of 100, see the Consistency tab of a session). A session needs at least 3 valid laps to have one. Left to right = the driver's sessions, oldest first.")
+        const tr = trendLine(pts);
+        return pts.length ? formChart([{ label: "Consistency", color: DRIVER_COLORS[2], pts }].concat(tr.length ? [{ label: "Trend", color: DRIVER_COLORS[2], pts: tr, dashed: true }] : []), (v) => v.toFixed(0), 5, false, "Consistency score of each session (out of 100, see the Consistency tab of a session). The dashed line is the trend (a straight line through the sessions): going up = getting steadier. A session needs at least 3 valid laps to have one. Left to right = the driver's sessions, oldest first.")
           : noData("Not enough valid laps yet.");
       } },
       { title: "Sessions", make: () => {

@@ -152,6 +152,12 @@ class LineChart {
       const col = safeColor(s.color);
       g.globalAlpha = i === hov ? 0.92 : (o.dots ? 0.72 : 0.41);
       g.strokeStyle = col; g.lineWidth = i === hov ? 3 : 2;
+      if (s.dashed) {                                     // a trendline: thin and dashed, no points
+        g.globalAlpha = 0.85; g.lineWidth = 1.8; g.setLineDash([7, 5]);
+        g.beginPath(); s.pts.forEach(([x, y], j) => (j ? g.lineTo(mx(x), my(y)) : g.moveTo(mx(x), my(y)))); g.stroke();
+        g.setLineDash([]); g.globalAlpha = 1;
+        continue;
+      }
       if (!o.dots) {
         g.beginPath();
         s.pts.forEach(([x, y], j) => (j && !LineChart.broken(s, s.pts[j - 1][0], x) ? g.lineTo(mx(x), my(y)) : g.moveTo(mx(x), my(y))));
@@ -159,7 +165,7 @@ class LineChart {
       }
       if (o.dots || s.pts.length <= 40 || i === hov) {
         g.fillStyle = col;
-        const rad = o.dots ? (i === hov ? 6.5 : 5) : (i === hov ? 4.2 : 3);
+        const rad = o.dots ? (i === hov ? 6.5 : 5) : (o.bigdots ? (i === hov ? 5.6 : 4.6) : (i === hov ? 4.2 : 3));
         for (const [x, y] of s.pts) { g.beginPath(); g.arc(mx(x), my(y), rad, 0, Math.PI * 2); g.fill(); }
       }
       g.globalAlpha = 1;

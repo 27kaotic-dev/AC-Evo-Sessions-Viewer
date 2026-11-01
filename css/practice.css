@@ -17,6 +17,8 @@ td.barcell { min-width: 300px; padding: 3px 8px; }
 .cbar.stack > span { display: block; height: 100%; min-width: 0; position: relative; }
 .cbar > em { position: absolute; left: 9px; top: 0; bottom: 0; display: flex; align-items: center; font-style: normal; font-size: 12px; color: #12151c; white-space: nowrap; }
 .cbar > em.out { left: 100%; margin-left: 6px; color: inherit; opacity: .85; }
+.rkey { display: flex; gap: 20px; flex-wrap: wrap; padding: 0 0 6px 8px; font-size: 12px; opacity: .85; }
+.rkey > span { display: inline-flex; align-items: center; gap: 6px; }
 .glegend { display: flex; gap: 18px; flex-wrap: wrap; padding: 0 0 4px 182px; font-size: 12px; opacity: .8; }
 .glegend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
 .frow:hover .fbar { opacity: .95; }
