@@ -175,9 +175,9 @@ const gapLabel = (gap, best, km) => { const m = gapMetres(gap, best, km); return
 function barCell(lanes, mx, label, tip, stack) {
   if (!stack && !(lanes.length && lanes[0][0] > 0)) return h("td", { class: "barcell" });
   const tot = stack ? lanes.reduce((a, l) => a + Math.max(l[0], 0), 0) : lanes[0][0];
-  const parts = stack ? lanes.map(([v, c]) => h("span", { style: { flex: `${Math.max(v, 0)} 0 0.5cm`, background: c } })) : [];
+  const parts = stack ? lanes.map(([v, c]) => h("span", { style: { flex: `${Math.max(v, 0)} 0 0`, background: c } })) : [];
   const em = !stack && label ? h("em", { text: label }) : null;
-  const bar = h("span", { class: "cbar" + (stack ? " stack" : ""), style: { width: stack ? "calc(" + lanes.length * 0.5 + "cm + (100% - " + lanes.length * 0.5 + "cm) * " + (tot / mx) + ")" : Math.min(100, 100 * tot / mx) + "%", background: stack ? null : lanes[0][1] } }, parts, em);
+  const bar = h("span", { class: "cbar" + (stack ? " stack" : ""), style: { width: stack ? (100 * tot / mx) + "%" : Math.min(100, 100 * tot / mx) + "%", background: stack ? null : lanes[0][1] } }, parts, em);
   if (em && window.ResizeObserver) new ResizeObserver(() => em.classList.toggle("out", bar.offsetWidth < em.offsetWidth + 18)).observe(bar);   // the label sits inside the bar unless the bar is too short for it
   else if (em && 100 * tot / mx < 20) em.className = "out";
   return h("td", { class: "barcell", title: tip || null }, h("span", { class: "ltrack" }, bar));
@@ -329,7 +329,7 @@ function tSectors(rows) {
   });
   return h("div", null, table(["Driver", "Best S1", "Best S2", "Best S3", "Ideal lap", "Best lap", "Potential gain", "Ideal sector gaps"], trs, "", ["Driver", "", "", "", "", "", "How much faster the best lap could be",
     "Each driver's best sector 1 (blue), 2 (orange) and 3 (green) behind the quickest driver in that sector, one bar split into the three sectors, to scale. Hover for the numbers"]),
-    h("div", { class: "hint", text: "Ideal lap = the best sector 1, 2 and 3 of the driver's valid laps added together  ·  Potential gain = how much faster the best lap could be  ·  purple = the quickest sector of the session  ·  bars = how far each driver's best sector 1 (blue), 2 (orange) and 3 (green) is behind the quickest driver in that sector (the same best sectors as the columns), shown as one bar: every sector starts 0.5 cm long so the quickest one is visible, the length beyond that is the gap" }));
+    h("div", { class: "hint", text: "Ideal lap = the best sector 1, 2 and 3 of the driver's valid laps added together  ·  Potential gain = how much faster the best lap could be  ·  purple = the quickest sector of the session  ·  bars = how far each driver's best sector 1 (blue), 2 (orange) and 3 (green) is behind the quickest driver in that sector (the same best sectors as the columns), shown as one bar: the bars are to true scale (a sector with twice the gap is twice as long), and the quickest driver in a sector has none" }));
 }
 
 /* the sectors of each driver's best lap, with a bar of how far each sector is behind the quickest of them */
@@ -341,7 +341,7 @@ function tBestSec(rows) {
     td(fmtTime(r.best), "r " + pc(r.pos === 1, "purple b")), td(r.gap ? fmtGap(r.gap) : "", "r dim"),
     barCell(gaps[i].map((v, k) => [v, SECTOR_COLORS[k]]), mxs, "", "Behind the quickest sector of the best laps: " + gaps[i].map((v, k) => "S" + (k + 1) + " +" + (v / 1000).toFixed(3) + " s").join("   "), true)));
   return h("div", null, table(["Driver", "Lap", "S1", "S2", "S3", "Best lap", "Gap", "Best lap sector gaps"], trs, "", ["Driver", "The lap number of the best lap"]),
-    h("div", { class: "hint", text: "Sectors of each driver's best lap (the lap, not the best sector of each)  ·  purple = the quickest of those sectors  ·  Gap = behind the fastest best lap  ·  bars = how far each sector of the best lap is behind the quickest of those sectors, one bar split into sector 1 (blue), 2 (orange) and 3 (green): every sector starts 0.5 cm long, the length beyond that is the gap" }));
+    h("div", { class: "hint", text: "Sectors of each driver's best lap (the lap, not the best sector of each)  ·  purple = the quickest of those sectors  ·  Gap = behind the fastest best lap  ·  bars = how far each sector of the best lap is behind the quickest of those sectors, one bar split into sector 1 (blue), 2 (orange) and 3 (green): the bars are to true scale, a sector with twice the gap is twice as long, and the quickest driver in a sector has none" }));
 }
 
 function tCons(rows) {
