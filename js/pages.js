@@ -601,7 +601,7 @@ function viewH2h() {
   detail.append(h("div", { class: "chips" }, chip("Tracks in common", s.tracks), pairChip("Faster at track", s.a_tracks, s.b_tracks), chip("Sessions together", s.sessions), pairChip("Faster in session", s.a_sessions, s.b_sessions),
     s.avg_gap ? chip("Avg best-lap gap", `${s.avg_gap < 0 ? na : nb} by ${(Math.abs(s.avg_gap) / 1000).toFixed(3)}s`, s.avg_gap < 0 ? H2H_A : H2H_B) : null));
   const gapTd = (gap, aFast) => h("td", { class: "r", style: { color: gap ? (aFast ? H2H_A : H2H_B) : null }, text: gap ? (aFast ? "-" : "+") + (Math.abs(gap) / 1000).toFixed(3) : "" });
-  const selTrack = { v: res.tracks.length ? res.tracks[0].tkey : "" }, selSess = { v: res.together.length ? res.together[res.together.length - 1].sid : "" };
+  const selTrack = { v: res.tracks.length ? res.tracks[0].tkey : "" }, selSess = { v: res.together.length ? (res.together.filter((x) => x.a_best && x.b_best).pop() || res.together[res.together.length - 1]).sid : "" };
   const trk = res.tracks.map((x) => ({ id: x.tkey, cells: [td(trackLabel(x.track, x.layout), "b"), td(fmtTime(x.a_best), "r " + pc(x.gap < 0, "purple b")), td(fmtTime(x.b_best), "r " + pc(x.gap > 0, "purple b")),
     gapTd(x.gap, x.gap < 0), td(x.a_ideal ? fmtTime(x.a_ideal) : "", "r dim"), td(x.b_ideal ? fmtTime(x.b_ideal) : "", "r dim"), td(x.a_sessions, "c"), td(x.b_sessions, "c"),
     h("td", { class: "c b", style: { color: x.gap ? (x.gap < 0 ? H2H_A : H2H_B) : null }, text: x.gap ? (x.gap < 0 ? na : nb) : "-" })] }));
@@ -612,7 +612,7 @@ function viewH2h() {
       h("td", { class: "c b", style: { color: af ? H2H_A : bf ? H2H_B : null }, text: af ? na : bf ? nb : "-" })] };
   });
   const upper = tabset([
-    { title: "Tracks", make: () => listTable(["Track", `${sa} best`, `${sb} best`, "Gap", `${sa} ideal`, `${sb} ideal`, `${sa} sessions`, `${sb} sessions`, "Faster"], trk, (id) => { selTrack.v = id; markRows(upper.el, id); drawLower(); }, selTrack.v,
+    { title: "Tracks", make: () => listTable(["Track", `${sa} best`, `${sb} best`, "Gap", `${sa} ideal`, `${sb} ideal`, `${sa} sessions`, `${sb} sessions`, "Faster"], trk, (id) => { selTrack.v = id; const nx = tog.find((q) => { const s0 = ss.find((z) => z.id === q.id), x0 = res.together.find((z) => z.sid === q.id); return s0 && x0.a_best && x0.b_best && trackKey(s0.track, s0.layout) === id; }); if (nx) selSess.v = nx.id; markRows(upper.el, id); drawLower(); }, selTrack.v,
       [null, `${sa}'s best lap at this track`, `${sb}'s best lap at this track`, GAP2, `${sa}'s best sectors added together`, `${sb}'s best sectors added together`, `Sessions ${sa} has driven here`, `Sessions ${sb} has driven here`, "The driver with the quicker best lap"]) },
     { title: "Sessions together", make: () => tog.length ? listTable(["Date", "Track", "Type", `${sa} best`, `${sb} best`, "Gap", `${sa} laps`, `${sb} laps`, `${sa} consistency`, `${sb} consistency`, "Faster"], tog,
       (id) => { selSess.v = id; markRows(upper.el, id); drawLower(); }, selSess.v,
@@ -635,7 +635,8 @@ function viewH2h() {
       const out = e ? lapOutliers(e.laps, outlierPct()) : new Set();
       return { label: nameOf(pid), color: col, gaps: [...out], pts: e ? e.laps.map((l, i) => [i + 1, l[0], l]).filter(([n, , l]) => l[4] && l[0] > 0 && !out.has(n)).map(([x, y]) => [x, y]) : [] }; }).filter((q) => q.pts.length);
     return h("div", null, pickerBar(outlierPicker(drawLower)),
-      lineBox(series, {}, `Every valid lap of the session on ${fmtDate(sess.date)}. A lap further from the driver's median lap than the Show laps choice is left out and shows as a gap.`, 380));
+      lineBox(series, { links: series.map(() => Object.fromEntries(Array.from({ length: Math.max(0, ...sess.entries.map((e) => e.laps.length)) }, (_, i) => [i + 1, sess.id]))) },
+        `Every valid lap of the session on ${fmtDate(sess.date)}. A lap further from the driver's median lap than the Show laps choice is left out and shows as a gap.` + CLICK_HINT, 380));
   }
   function lowerProgress() {
     const here = ss.filter((x) => trackKey(x.track, x.layout) === selTrack.v), xl = {}, links = {};
