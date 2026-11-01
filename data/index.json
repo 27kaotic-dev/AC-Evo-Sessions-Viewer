@@ -1,7 +1,7 @@
 {
  "format": 1,
  "app": "ACEVO Results Viewer",
- "updated": "2026-11-01T17:16:47",
+ "updated": "2026-11-01T18:20:30",
  "sessions": [
   {
    "id": "0e6f487092f1",
@@ -624,6 +624,20 @@
    "drivers": 2,
    "laps": 17,
    "fp": "8c5ca22a4e75",
+   "cloud": true
+  },
+  {
+   "id": "798b3f3bc86c",
+   "file": "sessions/798b3f3bc86c.json",
+   "track": "Red Bull Ring",
+   "layout": "GP",
+   "date": "2026-11-02",
+   "time": "07:20:29",
+   "type": "Practice",
+   "weather": "",
+   "drivers": 2,
+   "laps": 10,
+   "fp": "556f025356c5",
    "cloud": true
   }
  ],
