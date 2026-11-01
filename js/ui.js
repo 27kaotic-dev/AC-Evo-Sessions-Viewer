@@ -82,7 +82,7 @@ function table(heads, rows, cls, tips) {
   const tbl = h("table", { class: "dt " + (cls || "") },
     h("thead", null, h("tr", null, heads.map((x, i) => h("th", { class: align(i), title: tipOf(x, i) }, x)))), h("tbody", null, rows));
   makeSizeable(tbl, heads.join("|") + "|" + (cls || ""));
-  return h("div", { class: "tablewrap" }, tbl);
+  return h("div", { class: "tablewrap" + (cls === "laps" ? " lapswrap" : "") }, tbl);
 }
 
 /* every column of a table can be dragged wider or narrower (the right edge of its heading); double-click puts the table back.

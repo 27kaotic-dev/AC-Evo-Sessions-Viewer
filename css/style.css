@@ -88,7 +88,6 @@ table.dt { border-collapse: collapse; width: 100%; }
 .dt th.c, .dt td.r { text-align: center; }
 .dt td.nm { font-weight: 700; }
 .dt td.nm .bar { display: inline-block; width: 4px; height: 1.1em; border-radius: 2px; margin-right: 8px; vertical-align: -0.2em; }
-.tablewrap:has(table.laps) { max-height: 600px; }   /* room for about 20 laps before the table scrolls */
 table.laps td { padding-top: 3px; padding-bottom: 3px; }
 table.laps th:first-child, table.laps td:first-child { position: sticky; left: 0; z-index: 2; background: var(--panel2); }
 

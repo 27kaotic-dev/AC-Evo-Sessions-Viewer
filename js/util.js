@@ -101,7 +101,7 @@ function fitTables() {
   document.querySelectorAll(".tablewrap").forEach((w) => {
     if (!w.offsetParent || w.classList.contains("listwrap")) return;      // on a tab that is not showing / a short list of choices
     const top = w.getBoundingClientRect().top + window.scrollY;
-    const want = Math.max(280, Math.floor(window.innerHeight - top - 24)) + "px";
+    const want = Math.max(w.classList.contains("lapswrap") ? 600 : 280, Math.floor(window.innerHeight - top - 24)) + "px";
     if (w.style.maxHeight !== want) w.style.maxHeight = want;
   });
 }
