@@ -32,12 +32,12 @@ function lineBox(series, opt, note, height = 440) {
   return h("div", { class: "chartwrap" }, cv, h("div", { class: "hint", text: note + " Hover a line or a name in the key to highlight it." }));
 }
 /* a clickable list: the table of choices at the top of a page */
-function listTable(heads, rows, onPick, selected) {
+function listTable(heads, rows, onPick, selected, tips) {
   const trs = rows.map((r) => {
     const tr = h("tr", { class: "link" + (r.id === selected ? " focus" : ""), onclick: () => { onPick(r.id); }, id: "row-" + r.id }, r.cells);
     return tr;
   });
-  const w = table(heads, trs, "list");
+  const w = table(heads, trs, "list", tips);
   w.classList.add("listwrap");
   return w;
 }
@@ -123,7 +123,7 @@ function viewSessions() {
     return { id: s.id, cells: [td(fmtDate(s.date), "b"), td(s.time, "c dim"), td(trackLabel(s.track, s.layout), "b"), td(s.type, "c dim"), weatherCell(s), td(s.entries.length, "c"),
       td(s.entries.reduce((a, e) => a + e.laps.length, 0), "c dim"), td(lead ? fmtTime(lead.best) : "-", "c " + (lead ? "purple b" : "dim")), td(lead ? nameOf(lead.pid) : "", "dim"), td(s.server, "dim")] };
   });
-  root.append(bar, list.length ? listTable(["Date", "Time", "Track", "Type", "Weather", "Drivers", "Laps", "Fastest lap", "Driver", "Server"], rows, pick, st.sel) : noData("No sessions match."), detail);
+  root.append(bar, list.length ? listTable(["Date", "Time", "Track", "Type", "Weather", "Drivers", "Laps", "Fastest lap", "Driver", "Server"], rows, pick, st.sel, { Laps: "Laps driven by all the drivers", Driver: "Driver of the fastest lap" }) : noData("No sessions match."), detail);
   function rerender() { renderView(); }
   function drawDetail() {
     clear(detail);
@@ -188,6 +188,7 @@ function secTd(ms, gap, mx, k, top) {
   return h("td", { class: "seccell", title: gap > 0 ? "Behind the quickest in this sector: +" + (gap / 1000).toFixed(3) + " s" : null },
     h("span", { class: "sect " + pc(top, "purple b"), text: ms ? fmtTime(ms) : "" }), w ? h("span", { class: "secbar", style: { width: w + "px", background: SECTOR_COLORS[k] } }) : null);
 }
+const GAP2 = "Difference between the two times: - = the first driver is quicker, + = the second";
 const SECTOR_COLORS = ["#4f8ef7", "#f2a93b", "#45b58a"];
 const kmNote = (km) => (km ? `The distance is an estimate: the lap length (${km} km) times the gap divided by the fastest lap, i.e. how far behind the leader would be at the same average speed.`
   : "Add this track's length (km) to lengths.csv in the track maps folder (and publish again) to also see the gap in metres.");
@@ -266,7 +267,7 @@ function tRuns(rows) {
       return h("tr", null, h("td", { class: "c b", style: { color: RUN_COLORS[k % RUN_COLORS.length] }, text: "Run " + (k + 1) }), td(x.last > x.first ? `${x.first} to ${x.last}` : x.first, "c"), td(`${x.valid} of ${x.laps.length}`, "c dim"),
         td(fmtTime(x.avg), "r"), td(fmtTime(x.best), "r " + pc(x.best === best, "purple b")), h("td", { class: "r", style: { color: d < 0 ? "var(--green, #3ddc84)" : null, opacity: d < 0 ? 1 : .6 }, text: d ? (d < 0 ? "-" : "+") + (Math.abs(d) / 1000).toFixed(3) + " s" : "" })); });
     holder.append(runs.length ? h("div", { class: "chartwrap" }, runsKey(), runsSvg(r.e.laps, runs, slow)) : noData("This driver needs two valid laps"),
-      table(["Run", "Laps", "Valid", "Average lap", "Best lap", "Best vs previous run"], trs),
+      table(["Run", "Laps", "Valid", "Average lap", "Best lap", "Best vs previous run"], trs, "", { Laps: "Lap numbers in the run", Valid: "Laps the game counted, out of the laps in the run", "Average lap": "Average lap time of the run", "Best lap": "Fastest lap of the run" }),
       h("div", { class: "hint", text: "A run ends at a slow lap (a pit, cool-down or out lap or a mistake: a lap further from the driver's median lap than the Show laps choice, shown as a ring at the bottom) and runs shorter than 3 laps are joined to their neighbour. White dot = valid lap, red x = a lap the game did not count, dashed line = the run's average. Hover a lap for its time." }));
   }
   draw();
@@ -353,7 +354,7 @@ function tCons(rows) {
   const trs = have.map((r, i) => h("tr", null, td(i + 1, "c b " + medalClass(i + 1)), td(nameOf(r.pid), "b"), td(r.st.cons.toFixed(1), "c " + pc(i === 0, "green b")),
     td(fmtTime(r.st.avg), "r"), td((r.st.sd / 1000).toFixed(3) + " s", "r dim"), td(r.st.counted, "c dim"), td(r.st.valid, "c dim")));
   return table(["Rank", "Driver", "Consistency", "Average lap", "Std. deviation", "Laps counted", "Valid laps"], trs, "", [
-    "Rank", "Driver",
+    "Rank by consistency score", "Driver",
     "Out of 100: 100 minus 10 x the standard deviation as a % of the average lap. Counts valid laps within 8% of the driver's best lap (needs 3 valid laps). Laps the game did not count (cuts) are left out; slow laps and mistakes lower it.",
     "Average of the counted laps", "How far the counted laps spread from the average, in seconds. Bigger = less steady", "Valid laps within 8% of the driver's best lap", "Laps the game counted"]);
 }
@@ -414,7 +415,7 @@ function viewTracks() {
       { title: "Leaderboard", make: () => table(["Pos", "Driver", "Best lap", "Gap", "Ideal lap", "Sessions", "Laps", "Valid", "Car", "Date"],
         board.map((r) => h("tr", rowLink(r.sid), td(r.pos, "c b " + medalClass(r.pos)), td(nameOf(r.pid), "b"), td(fmtTime(r.best), "r " + pc(r.pos === 1, "purple b")), td(r.gap ? fmtGap(r.gap) : "", "r dim"),
           td(r.ideal ? fmtTime(r.ideal) : "", "r dim"), td(r.sessions, "c"), td(r.laps, "c dim"), td(r.valid, "c dim"), td(r.car, "dim"), td(fmtDate(r.date), "c dim"))), "",
-        [null, null, null, null, "The driver's best sector 1, 2 and 3 (from any session here) added together"]) },
+        { "Ideal lap": "Best sector 1, 2 and 3 from any session here, added together", Car: "Car of the best lap", Date: "Date of the best lap" }) },
       { title: "Record history", make: () => {
         const pts = statsHistory(sw, x.tkey, car).filter((p) => !since || p.date >= since);
         if (!pts.length) return noData("No laps for this choice (try another car or period).");
@@ -428,13 +429,13 @@ function viewTracks() {
         const trs = cols.map((c, k) => h("tr", null, td(`Sector ${k + 1}`, "b"), td(c.length ? fmtTime(c[0][0]) : "-", "r purple b"), td(c.length ? nameOf(c[0][1]) : "", "b"),
           td(c.length > 1 ? fmtTime(c[1][0]) : "-", "r dim"), td(c.length > 1 ? nameOf(c[1][1]) : "", "dim")));
         const ideal = cols.every((c) => c.length) ? cols.reduce((a, c) => a + c[0][0], 0) : 0;
-        return h("div", null, table(["Sector", "Best time", "Driver", "Second best", "Driver"], trs),
+        return h("div", null, table(["Sector", "Best time", "Driver", "Second best", "Driver"], trs, "", [null, null, "Driver of the best time", null, "Driver of the second best time"]),
           h("div", { class: "hint", text: "The quickest each sector has been driven here by anyone" + (ideal ? `  ·  all three together = ${fmtTime(ideal)}, the ideal lap for this track` : "") }));
       } },
       { title: "Sessions here", make: () => table(["Date", "Time", "Type", "Drivers", "Fastest lap", "Driver"], [...here].reverse().map((s) => {
         const r = sessionRows(s), lead = r.length && r[0].best ? r[0] : null;
         return h("tr", rowLink(s.id), td(fmtDate(s.date), "b"), td(s.time, "c dim"), td(s.type, "c dim"), td(s.entries.length, "c"), td(lead ? fmtTime(lead.best) : "-", "r " + (lead ? "purple b" : "dim")), td(lead ? nameOf(lead.pid) : "", "dim"));
-      })) },
+      }), "", { Driver: "Driver of the fastest lap" }) },
     ], 0, "track");
     detail.append(bar, topRow, tabs.el);
   }
@@ -450,25 +451,19 @@ function viewDrivers() {
   const rows = statsDrivers(ss).sort((a, b) => cmpT([-a.records, -a.sessions, lc(nameOf(a.pid))], [-b.records, -b.sessions, lc(nameOf(b.pid))]));
   if (!rows.some((r) => r.pid === st.sel)) st.sel = rows.length ? rows[0].pid : "";
   const detail = h("div");
-  const list = rows.map((r) => ({ id: r.pid, cells: [td(nameOf(r.pid), "b"), td(r.sessions, "c"), td(r.laps, "c dim"), td(r.valid, "c dim"), td(r.tracks, "c"),
-    td(r.records || "-", "c " + (r.records ? "purple b" : "dim")), td(fmtDate(r.first), "c dim"), td(fmtDate(r.last), "c dim")] }));
-  const dsel = h("select", { "aria-label": "Driver", onchange: () => { st.sel = dsel.value; pickRow(dsel.value); } },
+  const dsel = h("select", { "aria-label": "Driver", onchange: () => { st.sel = dsel.value; drawDetail(); } },
     [...rows].sort((a, b) => cmp(lc(nameOf(a.pid)), lc(nameOf(b.pid)))).map((r) => option(r.pid, nameOf(r.pid), r.pid === st.sel)));
   if (rows.length) root.append(pickerBar(field("Driver:", dsel)));
-  root.append(rows.length ? listTable(["Driver", "Sessions", "Laps", "Valid laps", "Tracks", "Records held", "First session", "Last session"], list, (id) => { st.sel = id; pickRow(id); }, st.sel) : noData("No sessions yet."), detail);
-  function pickRow(id) {
-    root.querySelectorAll(".listwrap tr.link").forEach((tr) => tr.classList.toggle("focus", tr.id === "row-" + id));
-    dsel.value = id;
-    const tr = root.querySelector("#row-" + CSS.escape(id)); if (tr && tr.scrollIntoView) tr.scrollIntoView({ block: "nearest" });
-    drawDetail();
-  }
+  else root.append(noData("No sessions yet."));
+  root.append(detail);
   function drawDetail() {
     clear(detail);
     const pid = st.sel, me = rows.find((r) => r.pid === pid);
     if (!me) return;
     const car = statsCareer(ss, pid);
     const chips = h("div", { class: "chips" }, chip("Driver", nameOf(pid)), chip("Sessions", me.sessions), chip("Laps", `${me.valid} valid of ${me.laps}`), chip("Tracks", me.tracks),
-      chip("Records held", me.records || "-", me.records ? cssVar("--purple") : null));
+      chip("Records held", me.records || "-", me.records ? cssVar("--purple") : null),
+      chip("First session", fmtDate(me.first)), chip("Last session", fmtDate(me.last)));
     const form = statsForm(ss, pid);
     if (form.length) {
       const laps = form.reduce((a, f) => a + f.laps, 0), valid = form.reduce((a, f) => a + f.valid, 0), km = form.reduce((a, f) => a + f.km, 0), ft = {}, fc = {};
@@ -483,7 +478,7 @@ function viewDrivers() {
       { title: "Tracks", make: () => table(["Track", "Best lap", "Rank", "Track record", "Gap to record", "Ideal lap", "Sessions", "Laps", "Valid", "Car", "Date"], car.map((r) => h("tr", null,
         td(trackLabel(r.track, r.layout), "b"), td(r.best ? fmtTime(r.best) : "-", "r " + pc(r.pos === 1, "purple b")), td(r.pos ? `${r.pos} of ${r.of}` : "-", "c " + (r.pos && r.pos <= 3 ? "b " + medalClass(r.pos) : "")),
         td(r.record ? fmtTime(r.record) : "-", "r dim"), td(r.gap ? fmtGap(r.gap) : "", "r dim"), td(r.ideal ? fmtTime(r.ideal) : "", "r dim"), td(r.sessions, "c"), td(r.laps, "c dim"), td(r.valid, "c dim"),
-        td(r.car, "dim"), td(fmtDate(r.date), "c dim")))) },
+        td(r.car, "dim"), td(fmtDate(r.date), "c dim"))), "", { "Ideal lap": "Best sector 1, 2 and 3 from any session at the track, added together", Car: "Car of the best lap", Date: "Date of the best lap" }) },
       { title: "Progress", make: () => {
         const wrap = h("div"), have = car.filter((r) => r.series.length);
         if (!have.length) return noData("No valid laps yet.");
@@ -542,7 +537,7 @@ function viewDrivers() {
             if (fr(lo) === fr(hi)) lo = hi = null;
           }
           const sec = (j) => { const [rk, of, gap] = res[j]; return td(!rk ? "" : `${rk} of ${of}` + (gap ? `   +${(gap / 1000).toFixed(3)} s` : "   quickest"), "c " + (rk === 1 && of > 1 ? "purple b" : rk ? "" : "dim")); };
-          const tag = (j) => h("td", { class: "c b", style: { color: j === null ? null : SECTOR_COLORS[j] }, text: j === null ? "" : "Sector " + (j + 1) });
+          const tag = (j) => h("td", { class: "c b", text: j === null ? "" : "Sector " + (j + 1) });
           return h("tr", null, td(names[tkey], "b"), sec(0), sec(1), sec(2), tag(lo), tag(hi));
         });
         return h("div", null, table(["Track", "Sector 1", "Sector 2", "Sector 3", "Strongest", "Weakest"], trs),
@@ -555,7 +550,7 @@ function viewDrivers() {
         const rows2 = [...d.values()].sort((a, b) => cmpT([lc(trackLabel(a.track, a.layout)), a.best || 1e12], [lc(trackLabel(b.track, b.layout)), b.best || 1e12]));
         if (!rows2.length) return noData("No sessions yet.");
         return h("div", null, table(["Track", "Car", "Best lap", "Average lap", "Sessions", "Laps", "Valid"], rows2.map((x) => h("tr", null, td(trackLabel(x.track, x.layout), "b"), td(x.car), td(x.best ? fmtTime(x.best) : "-", "r"),
-          td(x.avgs.length ? fmtTime(x.avgs.reduce((p, q) => p + q, 0) / x.avgs.length) : "", "r dim"), td(x.sessions, "c"), td(x.laps, "c dim"), td(x.laps ? `${x.valid}  (${Math.round(100 * x.valid / x.laps)}%)` : "", "c dim")))),
+          td(x.avgs.length ? fmtTime(x.avgs.reduce((p, q) => p + q, 0) / x.avgs.length) : "", "r dim"), td(x.sessions, "c"), td(x.laps, "c dim"), td(x.laps ? `${x.valid}  (${Math.round(100 * x.valid / x.laps)}%)` : "", "c dim"))), "", { "Average lap": "Average of their session averages (clean laps only)" }),
           h("div", { class: "hint", text: "Every track and car the driver has used: best lap, average lap (the average of their session averages, clean laps only), sessions, laps and valid laps. Compare cars on the same track." }));
       } },
       { title: "Clean driving", make: () => {
@@ -568,7 +563,7 @@ function viewDrivers() {
       { title: "Consistency", make: () => {
         const pts = form.map((f, i) => [i + 1, f.cons]).filter((p) => p[1]);
         const tr = trendLine(pts);
-        return pts.length ? formChart([{ label: "Consistency", color: DRIVER_COLORS[2], pts }].concat(tr.length ? [{ label: "Trend", color: DRIVER_COLORS[2], pts: tr, dashed: true }] : []), (v) => v.toFixed(0), 5, false, "Consistency score of each session (out of 100, see the Consistency tab of a session). The dashed line is the trend (a straight line through the sessions): going up = getting steadier. A session needs at least 3 valid laps to have one. Left to right = the driver's sessions, oldest first.")
+        return pts.length ? formChart([{ label: "Consistency", color: DRIVER_COLORS[2], pts }].concat(tr.length ? [{ label: "Trend", color: DRIVER_COLORS[1], pts: tr, dashed: true }] : []), (v) => v.toFixed(0), 5, false, "Consistency score of each session (out of 100, see the Consistency tab of a session). The dashed line is the trend (a straight line through the sessions): going up = getting steadier. A session needs at least 3 valid laps to have one. Left to right = the driver's sessions, oldest first.")
           : noData("Not enough valid laps yet.");
       } },
       { title: "Sessions", make: () => {
@@ -576,7 +571,7 @@ function viewDrivers() {
         for (const s of [...ss].reverse()) { const rr = sessionRows(s); const r = rr.find((x) => x.pid === pid); if (r) mine.push([s, r]); }
         return table(["Date", "Track", "Type", "Position", "Best lap", "Gap", "Laps", "Valid", "Consistency", "Car"], mine.map(([s, r]) => h("tr", rowLink(s.id), td(fmtDate(s.date), "b"), td(trackLabel(s.track, s.layout)), td(s.type, "c dim"),
           td(r.pos ? `${r.pos} of ${s.entries.length}` : "-", "c " + (r.pos && r.pos <= 3 ? medalClass(r.pos) : "dim")), td(r.best ? fmtTime(r.best) : "-", "r"), td(r.gap ? fmtGap(r.gap) : "", "r dim"),
-          td(r.st.laps, "c dim"), td(r.st.valid, "c dim"), td(r.st.cons ? r.st.cons.toFixed(1) : "", "c dim"), td(r.car, "dim"))));
+          td(r.st.laps, "c dim"), td(r.st.valid, "c dim"), td(r.st.cons ? r.st.cons.toFixed(1) : "", "c dim"), td(r.car, "dim"))), "", { Gap: "Behind the fastest lap of that session" });
       } },
     ], 0, "driver");
     detail.append(pickerBar(h("span", { class: "grow" }), csvButton(() => visibleTable(detail), () => `${nameOf(pid)}_tracks`)), chips, tabs.el);
@@ -615,9 +610,11 @@ function viewH2h() {
       h("td", { class: "c b", style: { color: af ? H2H_A : bf ? H2H_B : null }, text: af ? na : bf ? nb : "-" })] };
   });
   const upper = tabset([
-    { title: "Tracks", make: () => listTable(["Track", `${sa} best`, `${sb} best`, "Gap", `${sa} ideal`, `${sb} ideal`, `${sa} sessions`, `${sb} sessions`, "Faster"], trk, (id) => { selTrack.v = id; markRows(upper.el, id); drawLower(); }, selTrack.v) },
+    { title: "Tracks", make: () => listTable(["Track", `${sa} best`, `${sb} best`, "Gap", `${sa} ideal`, `${sb} ideal`, `${sa} sessions`, `${sb} sessions`, "Faster"], trk, (id) => { selTrack.v = id; markRows(upper.el, id); drawLower(); }, selTrack.v,
+      [null, `${sa}'s best lap at this track`, `${sb}'s best lap at this track`, GAP2, `${sa}'s best sectors added together`, `${sb}'s best sectors added together`, `Sessions ${sa} has driven here`, `Sessions ${sb} has driven here`, "The driver with the quicker best lap"]) },
     { title: "Sessions together", make: () => tog.length ? listTable(["Date", "Track", "Type", `${sa} best`, `${sb} best`, "Gap", `${sa} laps`, `${sb} laps`, `${sa} consistency`, `${sb} consistency`, "Faster"], tog,
-      (id) => { selSess.v = id; markRows(upper.el, id); drawLower(); }, selSess.v) : noData("They have not driven in the same session.") },
+      (id) => { selSess.v = id; markRows(upper.el, id); drawLower(); }, selSess.v,
+      [null, null, null, `${sa}'s best lap in that session`, `${sb}'s best lap in that session`, GAP2, `Laps ${sa} drove in that session`, `Laps ${sb} drove in that session`, `${sa}'s consistency in that session`, `${sb}'s consistency in that session`, "The driver with the quicker best lap in that session"]) : noData("They have not driven in the same session.") },
   ]);
   function markRows(el, id) { el.querySelectorAll(".pane:not([hidden]) tr.link").forEach((tr) => tr.classList.toggle("focus", tr.id === "row-" + id)); }
   const lowHolder = h("div");
@@ -654,7 +651,7 @@ function viewH2h() {
       return h("tr", null, td(k < 3 ? `Sector ${k + 1}` : "Ideal lap", "b"), td(av ? fmtTime(av) : "-", "r " + pc(gap < 0, "purple b")), td(bv ? fmtTime(bv) : "-", "r " + pc(gap > 0, "purple b")), gapTd(gap, gap < 0),
         h("td", { class: "c b", style: { color: gap ? (gap < 0 ? H2H_A : H2H_B) : null }, text: gap ? (gap < 0 ? na : nb) : "-" }));
     });
-    return table(["Sector", `${sa} best`, `${sb} best`, "Gap", "Faster"], trs);
+    return table(["Sector", `${sa} best`, `${sb} best`, "Gap", "Faster"], trs, "", [null, `${sa}'s best time in this sector`, `${sb}'s best time in this sector`, GAP2, "The driver with the quicker time"]);
   }
   function lowerGap() {
     const x = res.tracks.find((t) => t.tkey === selTrack.v);

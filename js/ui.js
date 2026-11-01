@@ -31,11 +31,56 @@ function chip(title, value, color) {
 }
 
 /* column headings follow their column: centred over centred / number columns, left over names and text */
+const HEAD_TIPS = {
+  "Pos": "Position by best valid lap",
+  "No.": "Race number",
+  "Best lap": "Fastest lap the game counted",
+  "Gap": "Behind the fastest lap",
+  "Interval": "Behind the driver ranked just above",
+  "Ideal lap": "Best sector 1, 2 and 3 added together",
+  "Laps": "Laps driven",
+  "Valid": "Laps the game counted (no track cut)",
+  "Valid laps": "Laps the game counted (no track cut)",
+  "Best S1": "Best sector 1 from any valid lap",
+  "Best S2": "Best sector 2 from any valid lap",
+  "Best S3": "Best sector 3 from any valid lap",
+  "Consistency": "Steadiness out of 100 (see the Consistency tab of a session)",
+  "Average lap": "Average of the counted laps",
+  "Std. deviation": "Spread of the laps around the average. Bigger = less steady",
+  "Laps counted": "Valid laps within 8% of the best lap",
+  "Run": "A stretch of laps. It ends at a slow lap (pit, out or cool-down lap)",
+  "Best vs previous run": "Change in best lap since the previous run (green = quicker)",
+  "Invalid laps": "Laps the game did not count",
+  "Invalid lap numbers": "Which laps were not counted",
+  "Track cut warnings": "Times the game warned of cutting the track",
+  "Pit speeding": "Pit lane speeding penalties",
+  "Collisions": "Contacts, with cars or anything else",
+  "With cars": "Of the collisions, contacts with other cars",
+  "Type": "Practice, qualifying or race",
+  "Weather": "Dry, damp, wet or mixed: picked when the sessions are imported",
+  "Drivers": "Drivers in the session",
+  "Fastest lap": "Best valid lap of the session",
+  "Server": "Server the session was run on",
+  "Sessions": "Sessions driven",
+  "Rank": "Position on the track's leaderboard",
+  "Track record": "Fastest valid lap at the track, from any driver",
+  "Gap to record": "Best lap behind the track record",
+  "Best time": "Fastest time in this sector, from any driver",
+  "Second best": "Second fastest time in this sector",
+  "Position": "Place in the session by best lap",
+  "Sector 1": "Rank of their best sector 1 among every driver at the track, and the time behind the quickest",
+  "Sector 2": "Rank of their best sector 2 among every driver at the track, and the time behind the quickest",
+  "Sector 3": "Rank of their best sector 3 among every driver at the track, and the time behind the quickest",
+  "Strongest": "The sector where they rank best compared with the field",
+  "Weakest": "The sector where they rank worst compared with the field",
+};
+/* tips: an array (one text per column) or an object {heading: text} for the columns that mean something else in this table */
 function table(heads, rows, cls, tips) {
+  const tipOf = (x, i) => (Array.isArray(tips) ? tips[i] : tips && tips[x]) || HEAD_TIPS[x] || null;
   const first = rows.length ? rows[0].children : [];
   const align = (i) => (first[i] && /(^|\s)[cr](\s|$)/.test(first[i].className) ? "c" : "");
   const tbl = h("table", { class: "dt " + (cls || "") },
-    h("thead", null, h("tr", null, heads.map((x, i) => h("th", { class: align(i), title: tips && tips[i] ? tips[i] : null }, x)))), h("tbody", null, rows));
+    h("thead", null, h("tr", null, heads.map((x, i) => h("th", { class: align(i), title: tipOf(x, i) }, x)))), h("tbody", null, rows));
   makeSizeable(tbl, heads.join("|") + "|" + (cls || ""));
   return h("div", { class: "tablewrap" }, tbl);
 }
