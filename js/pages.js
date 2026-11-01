@@ -232,12 +232,14 @@ function runsSvg(laps, runs, slow) {
   });
   laps.forEach((l, i0) => {
     const i = i0 + 1; if (!(l[0] > 0)) return;
-    const how = slow.has(i) ? "slow lap, left out (a pit / cool-down / out lap or a mistake)" : l[4] ? "valid" : "not counted by the game", tip = `Lap ${i}: ${fmtTime(l[0])}  (${how})`;
+    const how = slow.has(i) ? "slow lap, left out (a pit / cool-down / out lap or a mistake)" : l[4] ? "valid" : "invalid", tip = `Lap ${i}: ${fmtTime(l[0])}  (${how})`;
     let m;
+    const g = el("g", {}), cy0 = slow.has(i) ? H - B - 4 : y(l[0]);
+    g.append(el("circle", { cx: x(i), cy: cy0, r: 9, fill: "transparent", "pointer-events": "all" }));      /* a bigger area to hover, so the time shows every time */
     if (slow.has(i)) m = el("circle", { cx: x(i), cy: H - B - 4, r: 3.5, fill: "none", stroke: "currentColor", "stroke-opacity": ".55" });
     else if (l[4]) m = el("circle", { cx: x(i), cy: y(l[0]), r: 4, fill: "currentColor" });
     else { const cy = y(l[0]); m = el("path", { d: `M${x(i) - 3.5} ${cy - 3.5}l7 7m0 -7l-7 7`, stroke: "#ff6b81", "stroke-width": 1.8 }); }
-    m.append(el("title", {}, tip)); svg.append(m);
+    g.append(m, el("title", {}, tip)); svg.append(g);
   });
   const sx = [1, 2, 5, 10, 20, 50].find((s) => n / s <= 20) || 100;
   for (let lap = sx; lap <= n; lap += sx) svg.append(el("text", { x: x(lap), y: H - B + 18, "font-size": 11, "text-anchor": "middle", fill: "currentColor", "fill-opacity": ".6" }, String(lap)));
