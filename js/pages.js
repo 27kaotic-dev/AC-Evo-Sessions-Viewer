@@ -176,8 +176,11 @@ function barCell(lanes, mx, label, tip, stack) {
   if (!stack && !(lanes.length && lanes[0][0] > 0)) return h("td", { class: "barcell" });
   const tot = stack ? lanes.reduce((a, l) => a + Math.max(l[0], 0), 0) : lanes[0][0];
   const parts = stack ? lanes.map(([v, c]) => h("span", { style: { flex: `${Math.max(v, 0)} 0 0.5cm`, background: c } })) : [];
-  return h("td", { class: "barcell", title: tip || null }, h("span", { class: "ltrack" },
-    h("span", { class: "cbar" + (stack ? " stack" : ""), style: { width: stack ? "calc(" + lanes.length * 0.5 + "cm + (100% - " + lanes.length * 0.5 + "cm) * " + (tot / mx) + ")" : Math.min(100, 100 * tot / mx) + "%", background: stack ? null : lanes[0][1] } }, parts, !stack && label ? h("em", { text: label, class: 100 * tot / mx < 20 ? "out" : "" }) : null)));
+  const em = !stack && label ? h("em", { text: label }) : null;
+  const bar = h("span", { class: "cbar" + (stack ? " stack" : ""), style: { width: stack ? "calc(" + lanes.length * 0.5 + "cm + (100% - " + lanes.length * 0.5 + "cm) * " + (tot / mx) + ")" : Math.min(100, 100 * tot / mx) + "%", background: stack ? null : lanes[0][1] } }, parts, em);
+  if (em && window.ResizeObserver) new ResizeObserver(() => em.classList.toggle("out", bar.offsetWidth < em.offsetWidth + 18)).observe(bar);   // the label sits inside the bar unless the bar is too short for it
+  else if (em && 100 * tot / mx < 20) em.className = "out";
+  return h("td", { class: "barcell", title: tip || null }, h("span", { class: "ltrack" }, bar));
 }
 const SECTOR_COLORS = ["#4f8ef7", "#f2a93b", "#45b58a"];
 const kmNote = (km) => (km ? `The distance is an estimate: the lap length (${km} km) times the gap divided by the fastest lap, i.e. how far behind the leader would be at the same average speed.`
@@ -272,9 +275,9 @@ function tClass(rows, sess) {
       td(st.ideal ? fmtTime(st.ideal) : "", "r dim"), td(st.laps, "c"), td(st.valid, "c dim"),
       barCell(r.gap ? [[r.gap, colorOf(r.pid)]] : [], mx, r.gap ? (km ? Math.round(gapMetres(r.gap, lead, km)) + "m" : "+" + (r.gap / 1000).toFixed(3) + " s") : "", r.gap ? gapLabel(r.gap, lead, km) + " behind " + nameOf(rows[0].pid) : ""));
   });
-  return table(["Pos", "Driver", "Car", "No.", "Best lap", "Gap", "Interval", "Ideal lap", "Laps", "Valid", "Gap to fastest"], trs, "", [
+  return table(["Pos", "Driver", "Car", "No.", "Best lap", "Gap", "Interval", "Ideal lap", "Laps", "Valid", "Distance To Fastest"], trs, "", [
     "Position by best valid lap", "Driver", "Car", "Race number", "The fastest lap the game counted", "Behind the fastest lap of the session", "Behind the driver ranked just above",
-    "The best sectors of all their valid laps added together", "Laps driven", "Laps the game counted (no cut)", "How far behind the fastest lap, to scale. " + kmNote(km)]);
+    "The best sectors of all their valid laps added together", "Laps driven", "Laps the game counted (no cut)", "Metres Behind = Track Length (m) × Gap (s) ÷ Fastest Lap (s)"]);
 }
 
 function trackRecord(sess) {
