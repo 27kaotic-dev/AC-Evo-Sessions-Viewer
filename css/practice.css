@@ -19,6 +19,9 @@ td.barcell { min-width: 300px; padding: 3px 8px; }
 .cbar > em.out { left: 100%; margin-left: 6px; color: inherit; opacity: .85; }
 .rkey { display: flex; gap: 20px; flex-wrap: wrap; padding: 0 0 6px 8px; font-size: 12px; opacity: .85; }
 .rkey > span { display: inline-flex; align-items: center; gap: 6px; }
+.seccell { white-space: nowrap; }
+.seccell .sect { display: inline-block; min-width: 4.4em; }
+.secbar { display: inline-block; height: 12px; border-radius: 4px; vertical-align: middle; margin-left: 8px; opacity: .88; }
 .glegend { display: flex; gap: 18px; flex-wrap: wrap; padding: 0 0 4px 182px; font-size: 12px; opacity: .8; }
 .glegend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
 .frow:hover .fbar { opacity: .95; }

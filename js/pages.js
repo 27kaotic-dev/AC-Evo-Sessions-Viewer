@@ -175,12 +175,18 @@ const gapLabel = (gap, best, km) => { const m = gapMetres(gap, best, km); return
 function barCell(lanes, mx, label, tip, stack) {
   if (!stack && !(lanes.length && lanes[0][0] > 0)) return h("td", { class: "barcell" });
   const tot = stack ? lanes.reduce((a, l) => a + Math.max(l[0], 0), 0) : lanes[0][0];
-  const parts = stack ? lanes.map(([v, c]) => h("span", { style: { flex: `${Math.max(v, 0)} 0 0`, background: c } })) : [];
+  const parts = stack ? lanes.map(([v, c]) => h("span", { style: { flex: v > 0 ? `${v} 0 8px` : "0 0 0", background: c } })) : [];
   const em = !stack && label ? h("em", { text: label }) : null;
-  const bar = h("span", { class: "cbar" + (stack ? " stack" : ""), style: { width: stack ? (100 * tot / mx) + "%" : Math.min(100, 100 * tot / mx) + "%", background: stack ? null : lanes[0][1] } }, parts, em);
+  const bar = h("span", { class: "cbar" + (stack ? " stack" : ""), style: { width: stack ? "calc(" + 8 * lanes.filter((l) => l[0] > 0).length + "px + (100% - " + 8 * lanes.length + "px) * " + (tot / mx) + ")" : Math.min(100, 100 * tot / mx) + "%", background: stack ? null : lanes[0][1] } }, parts, em);
   if (em && window.ResizeObserver) new ResizeObserver(() => em.classList.toggle("out", bar.offsetWidth < em.offsetWidth + 18)).observe(bar);   // the label sits inside the bar unless the bar is too short for it
   else if (em && 100 * tot / mx < 20) em.className = "out";
   return h("td", { class: "barcell", title: tip || null }, h("span", { class: "ltrack" }, bar));
+}
+/* a sector time with a small bar to the right: the bar is how far the time is behind the quickest in that column (mx = the biggest gap in the column) */
+function secTd(ms, gap, mx, k, top) {
+  const w = gap > 0 ? Math.max(4, Math.round(110 * gap / Math.max(mx, 1))) : 0;
+  return h("td", { class: "seccell", title: gap > 0 ? "Behind the quickest in this sector: +" + (gap / 1000).toFixed(3) + " s" : null },
+    h("span", { class: "sect " + pc(top, "purple b"), text: ms ? fmtTime(ms) : "" }), w ? h("span", { class: "secbar", style: { width: w + "px", background: SECTOR_COLORS[k] } }) : null);
 }
 const SECTOR_COLORS = ["#4f8ef7", "#f2a93b", "#45b58a"];
 const kmNote = (km) => (km ? `The distance is an estimate: the lap length (${km} km) times the gap divided by the fastest lap, i.e. how far behind the leader would be at the same average speed.`
@@ -320,28 +326,26 @@ function tSectors(rows) {
   const sb = [0, 1, 2].map((k) => Math.min(...have.map((r) => r.st.sectors[k]).filter((x) => x), Infinity));
   const ideals = have.map((r) => r.st.ideal).filter((x) => x).sort((a, b) => a - b);
   const gaps = have.map((r) => [0, 1, 2].map((k) => (r.st.sectors[k] && sb[k] < Infinity ? r.st.sectors[k] - sb[k] : 0)));
-  const mxs = Math.max(1, ...gaps.map((g) => g[0] + g[1] + g[2]));
+  const mxk = [0, 1, 2].map((k) => Math.max(1, ...gaps.map((g) => g[k])));
   const trs = have.map((r, i) => {
     const st = r.st, g = gaps[i];
-    return h("tr", null, td(nameOf(r.pid), "b"), [0, 1, 2].map((k) => td(fmtTime(st.sectors[k]), "r " + pc(st.sectors[k] && st.sectors[k] === sb[k], "purple b"))),
+    return h("tr", null, td(nameOf(r.pid), "b"), [0, 1, 2].map((k) => secTd(st.sectors[k], g[k], mxk[k], k, st.sectors[k] && st.sectors[k] === sb[k])),
       td(st.ideal ? fmtTime(st.ideal) : "", "r " + pc(st.ideal && st.ideal === ideals[0], "green b")), td(fmtTime(r.best), "r"),
-      td(st.ideal && r.best > st.ideal ? fmtGap(r.best - st.ideal) : "", "r dim"), barCell(g.map((v, k) => [v, SECTOR_COLORS[k]]), mxs, "", "Behind the best of the session: " + g.map((v, k) => "S" + (k + 1) + " +" + (v / 1000).toFixed(3) + " s").join("   "), true));
+      td(st.ideal && r.best > st.ideal ? fmtGap(r.best - st.ideal) : "", "r dim"));
   });
-  return h("div", null, table(["Driver", "Best S1", "Best S2", "Best S3", "Ideal lap", "Best lap", "Potential gain", "Ideal sector gaps"], trs, "", ["Driver", "", "", "", "", "", "How much faster the best lap could be",
-    "Each driver's best sector 1 (blue), 2 (orange) and 3 (green) behind the quickest driver in that sector, one bar split into the three sectors, to scale. Hover for the numbers"]),
-    h("div", { class: "hint", text: "Ideal lap = the best sector 1, 2 and 3 of the driver's valid laps added together  ·  Potential gain = how much faster the best lap could be  ·  purple = the quickest sector of the session  ·  bars = how far each driver's best sector 1 (blue), 2 (orange) and 3 (green) is behind the quickest driver in that sector (the same best sectors as the columns), shown as one bar: the bars are to true scale (a sector with twice the gap is twice as long), and the quickest driver in a sector has none" }));
+  return h("div", null, table(["Driver", "Best S1", "Best S2", "Best S3", "Ideal lap", "Best lap", "Potential gain"], trs, "", ["Driver", "", "", "", "", "", "How much faster the best lap could be"]),
+    h("div", { class: "hint", text: "Ideal lap = the best sector 1, 2 and 3 of the driver's valid laps added together  ·  Potential gain = how much faster the best lap could be  ·  purple = the quickest sector of the session  ·  the small bar next to each sector time = how far that time is behind the quickest in the column (same scale down the column)" }));
 }
 
 /* the sectors of each driver's best lap, with a bar of how far each sector is behind the quickest of them */
 function tBestSec(rows) {
   const have = rows.filter((r) => r.best && r.st.best_lap).map((r) => ({ r, n: r.st.best_lap, sec: r.e.laps[r.st.best_lap - 1].slice(1, 4) })).filter((x) => x.sec.length === 3 && x.sec.every((v) => v > 0));
   const sb = [0, 1, 2].map((k) => Math.min(...have.map((x) => x.sec[k])));
-  const gaps = have.map((x) => x.sec.map((v, k) => v - sb[k])), mxs = Math.max(1, ...gaps.map((g) => g[0] + g[1] + g[2]));
-  const trs = have.map(({ r, n, sec }, i) => h("tr", null, td(nameOf(r.pid), "b"), td(n, "c dim"), sec.map((v, k) => td(fmtTime(v), "r " + pc(v === sb[k], "purple b"))),
-    td(fmtTime(r.best), "r " + pc(r.pos === 1, "purple b")), td(r.gap ? fmtGap(r.gap) : "", "r dim"),
-    barCell(gaps[i].map((v, k) => [v, SECTOR_COLORS[k]]), mxs, "", "Behind the quickest sector of the best laps: " + gaps[i].map((v, k) => "S" + (k + 1) + " +" + (v / 1000).toFixed(3) + " s").join("   "), true)));
-  return h("div", null, table(["Driver", "Lap", "S1", "S2", "S3", "Best lap", "Gap", "Best lap sector gaps"], trs, "", ["Driver", "The lap number of the best lap"]),
-    h("div", { class: "hint", text: "Sectors of each driver's best lap (the lap, not the best sector of each)  ·  purple = the quickest of those sectors  ·  Gap = behind the fastest best lap  ·  bars = how far each sector of the best lap is behind the quickest of those sectors, one bar split into sector 1 (blue), 2 (orange) and 3 (green): the bars are to true scale, a sector with twice the gap is twice as long, and the quickest driver in a sector has none" }));
+  const gaps = have.map((x) => x.sec.map((v, k) => v - sb[k])), mxk = [0, 1, 2].map((k) => Math.max(1, ...gaps.map((g) => g[k])));
+  const trs = have.map(({ r, n, sec }, i) => h("tr", null, td(nameOf(r.pid), "b"), td(n, "c dim"), sec.map((v, k) => secTd(v, gaps[i][k], mxk[k], k, v === sb[k])),
+    td(fmtTime(r.best), "r " + pc(r.pos === 1, "purple b")), td(r.gap ? fmtGap(r.gap) : "", "r dim")));
+  return h("div", null, table(["Driver", "Lap", "S1", "S2", "S3", "Best lap", "Gap"], trs, "", ["Driver", "The lap number of the best lap"]),
+    h("div", { class: "hint", text: "Sectors of each driver's best lap (the lap, not the best sector of each)  ·  purple = the quickest of those sectors  ·  Gap = behind the fastest best lap  ·  the small bar next to each sector time = how far that time is behind the quickest in the column (same scale down the column)" }));
 }
 
 function tCons(rows) {
