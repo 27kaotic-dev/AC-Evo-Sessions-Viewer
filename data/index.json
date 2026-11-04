@@ -1,7 +1,7 @@
 {
  "format": 1,
  "app": "ACEVO Results Viewer",
- "updated": "2026-11-04T11:13:11",
+ "updated": "2026-11-04T11:43:32",
  "sessions": [
   {
    "id": "0e6f487092f1",
@@ -918,6 +918,20 @@
    "drivers": 6,
    "laps": 98,
    "fp": "59cf084a0d5d",
+   "cloud": true
+  },
+  {
+   "id": "e7983962f3f9",
+   "file": "sessions/e7983962f3f9.json",
+   "track": "Red Bull Ring",
+   "layout": "GP",
+   "date": "2026-11-05",
+   "time": "00:43:30",
+   "type": "Qualify",
+   "weather": "",
+   "drivers": 2,
+   "laps": 2,
+   "fp": "d93f4fcebba2",
    "cloud": true
   }
  ],
