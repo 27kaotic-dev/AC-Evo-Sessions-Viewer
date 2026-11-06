@@ -637,8 +637,8 @@
   },
   {
    "circuit": "Fuji Speedway",
-   "layout": "",
-   "file": "maps/fujispeedway-x.svg",
+   "layout": "GP",
+   "file": "maps/fujispeedway-gp.svg",
    "licence": "CC BY-SA 3.0",
    "author": "Will Pittenger"
   },
@@ -686,8 +686,8 @@
   },
   {
    "circuit": "Oulton Park",
-   "layout": "",
-   "file": "maps/oultonpark-x.svg",
+   "layout": "International",
+   "file": "maps/oultonpark-international.svg",
    "licence": "CC BY-SA 3.0",
    "author": "Will Pittenger"
   },
@@ -730,8 +730,8 @@
    "circuit": "Red Bull Ring",
    "layout": "GP",
    "file": "maps/redbullring-gp.svg",
-   "licence": "CC BY-SA 3.0",
-   "author": "Pitlane02"
+   "licence": "CC BY-SA 4.0",
+   "author": "HumanBodyPiloter5"
   },
   {
    "circuit": "Road Atlanta",
@@ -742,8 +742,8 @@
   },
   {
    "circuit": "Sebring",
-   "layout": "Full",
-   "file": "maps/sebring-full.svg",
+   "layout": "GP",
+   "file": "maps/sebring-gp.svg",
    "licence": "CC BY-SA 3.0",
    "author": "Will Pittenger"
   },
@@ -781,33 +781,118 @@
    "file": "maps/watkinsglen-short.svg",
    "licence": "CC BY-SA 4.0",
    "author": "Stl66dmk"
+  },
+  {
+   "circuit": "Nurburgring",
+   "layout": "Nordschleife",
+   "file": "maps/nurburgring-nordschleife.svg",
+   "licence": "Public domain",
+   "author": "Will Pittenger"
+  },
+  {
+   "circuit": "Suzuka",
+   "layout": "West",
+   "file": "maps/suzuka-west.png",
+   "licence": "CC BY-SA 4.0",
+   "author": "DecadeHansen"
+  },
+  {
+   "circuit": "Red Bull Ring",
+   "layout": "National",
+   "file": "maps/redbullring-national.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "HumanBodyPiloter5"
+  },
+  {
+   "circuit": "Donington Park",
+   "layout": "National",
+   "file": "maps/doningtonpark-national.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Gpmat, after Will Pittenger"
+  },
+  {
+   "circuit": "Nurburgring",
+   "layout": "24H",
+   "file": "maps/nurburgring-24h.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Pitlane02"
+  },
+  {
+   "circuit": "Nurburgring",
+   "layout": "Sprint",
+   "file": "maps/nurburgring-sprint.svg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Pitlane02"
+  },
+  {
+   "circuit": "Oulton Park",
+   "layout": "Fosters",
+   "file": "maps/oultonpark-fosters.png",
+   "licence": "Supplied by the project owner (source not recorded)",
+   "author": ""
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "3A",
+   "file": "maps/circuitpaulricard-3a.png",
+   "licence": "Supplied by the project owner (source not recorded)",
+   "author": ""
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "3C",
+   "file": "maps/circuitpaulricard-3c.png",
+   "licence": "Supplied by the project owner (source not recorded)",
+   "author": ""
+  },
+  {
+   "circuit": "Watkins Glen",
+   "layout": "Short Inner Loop",
+   "file": "maps/watkinsglen-shortinnerloop.svg",
+   "licence": "CC BY-SA 4.0",
+   "author": "Stl66dmk"
   }
  ],
  "lengths": [
   {
    "circuit": "Brands Hatch",
    "layout": "GP",
-   "km": "3.908"
+   "km": "3.916"
   },
   {
    "circuit": "Brands Hatch",
    "layout": "Indy",
-   "km": "1.929"
+   "km": "1.944"
   },
   {
    "circuit": "Circuit of the Americas",
    "layout": "GP",
-   "km": "5.513"
+   "km": "5.515"
+  },
+  {
+   "circuit": "Circuit of the Americas",
+   "layout": "National",
+   "km": "3.702"
   },
   {
    "circuit": "Donington Park",
    "layout": "GP",
-   "km": "4.020"
+   "km": "4.02"
+  },
+  {
+   "circuit": "Donington Park",
+   "layout": "National",
+   "km": "3.149"
   },
   {
    "circuit": "Fuji Speedway",
-   "layout": "",
-   "km": "4.563"
+   "layout": "GP",
+   "km": "4.549"
+  },
+  {
+   "circuit": "Fuji Speedway",
+   "layout": "GP Short",
+   "km": "4.526"
   },
   {
    "circuit": "Imola",
@@ -840,14 +925,59 @@
    "km": "5.148"
   },
   {
+   "circuit": "Nurburgring",
+   "layout": "24H",
+   "km": "25.947"
+  },
+  {
+   "circuit": "Nurburgring",
+   "layout": "Nordschleife",
+   "km": "20.832"
+  },
+  {
+   "circuit": "Nurburgring",
+   "layout": "Sprint",
+   "km": "3.629"
+  },
+  {
+   "circuit": "Oulton Park",
+   "layout": "Fosters",
+   "km": "2.662"
+  },
+  {
+   "circuit": "Oulton Park",
+   "layout": "International",
+   "km": "4.333"
+  },
+  {
    "circuit": "Circuit Paul Ricard",
    "layout": "1A-V2",
+   "km": "5.77"
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "1C-V2",
    "km": "5.842"
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "3A",
+   "km": "3.793"
+  },
+  {
+   "circuit": "Circuit Paul Ricard",
+   "layout": "3C",
+   "km": "3.841"
   },
   {
    "circuit": "Red Bull Ring",
    "layout": "GP",
    "km": "4.318"
+  },
+  {
+   "circuit": "Red Bull Ring",
+   "layout": "National",
+   "km": "2.336"
   },
   {
    "circuit": "Road Atlanta",
@@ -856,8 +986,8 @@
   },
   {
    "circuit": "Sebring",
-   "layout": "Full",
-   "km": "6.019"
+   "layout": "GP",
+   "km": "5.954"
   },
   {
    "circuit": "Spa-Francorchamps",
@@ -875,14 +1005,29 @@
    "km": "2.243"
   },
   {
+   "circuit": "Suzuka",
+   "layout": "West",
+   "km": "3.466"
+  },
+  {
    "circuit": "Watkins Glen",
    "layout": "GP",
-   "km": "5.472"
+   "km": "5.435"
+  },
+  {
+   "circuit": "Watkins Glen",
+   "layout": "GP Inner Loop",
+   "km": "5.552"
   },
   {
    "circuit": "Watkins Glen",
    "layout": "Short",
-   "km": "3.941"
+   "km": "3.907"
+  },
+  {
+   "circuit": "Watkins Glen",
+   "layout": "Short Inner Loop",
+   "km": "3.943"
   }
  ]
 }

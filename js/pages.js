@@ -372,7 +372,7 @@ function tIncidents(rows) {
 }
 
 /* ---------------------------------------------------------------- tracks */
-const mapSlug = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+const mapSlug = (s) => String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 const findMap = (track, layout) => findRow(S.maps, track, layout);
 const findKm = (track, layout) => { const r = findRow(S.lengths, track, layout); return r ? Number(r.km) : 0; };
 function findRow(list, track, layout) {
@@ -380,7 +380,7 @@ function findRow(list, track, layout) {
   const mine = (list || []).filter((m) => { const c = mapSlug(m.circuit); return c && (t.includes(c) || c.includes(t)); });
   if (!t || !mine.length) return null;
   let exact = l ? mine.find((m) => mapSlug(m.layout) === l) : null;
-  if (!exact && (l.startsWith("gp") || l.startsWith("innerloop"))) exact = mine.find((m) => mapSlug(m.layout) === "gp") || null;     // e.g. "GP Inner Loop" = the full circuit
+  if (!exact && (l === "gpinnerloop" || l === "innerloop")) exact = mine.find((m) => mapSlug(m.layout) === "gp") || null;     // e.g. "GP Inner Loop" = the full circuit
   if (exact || (l && !["gp", "grandprix", "full", "f1", "default"].includes(l))) return exact || null;
   return mine.find((m) => ["gp", "full", ""].includes(mapSlug(m.layout))) || mine[0];
 }

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1337.8236" height="927.53363">
+	<style>
+		.num {
+			font-size: 56px;
+			text-anchor: middle;
+		}
+		circle {
+			fill: white;
+			stroke: #181818;
+			stroke-width: 2;
+		}
+		path {
+			fill: none;
+			stroke-linecap: butt;
+			stroke-linejoin: round;
+		}
+		text {
+			font-size: 32px;
+			font-family: Times New Roman,serif;
+			paint-order: stroke;
+			stroke-width: 2;
+		}
+	</style>
+	<defs>
+		<pattern patternUnits="userSpaceOnUse" width="8" height="8" id="checkered_2x2">
+			<circle r="22"/>
+			<rect width="4" height="4" x="4"/>
+			<rect width="4" height="4" y="4"/>
+		</pattern>
+		<pattern href="#checkered_2x2" id="pattern4264" patternTransform="translate(-.5,.3)"/>
+		<path id="pit_gp" d="M 474.7041 766.6137 C 497.0362 746.5496 524.0701 715.618 543.3454 693.3364 547.005 689.1061 549.5162 679.0256 547.6822 674.1945 545.4286 668.2583 539.8816 661.9771 534.0736 658.4923 528.915 655.3971 520.2928 652.014 509.3986 656.2491"/>
+		<path id="pit" d="M 569.9271 618.6005 C 544.9676 630.616 533.6749 646.8651 509.0434 656.3841 422.4742 690.0402 342.204 727.3312 254.2741 761.379 206.5165 779.8715 156.2844 793.444 108.3551 810.9907"/>
+		<path id="hairpin" d="M 591.6484 750.7617 C 568.7091 767.3212 528.6378 729.3055 552.4675 709.8609"/>
+		<path id="gp" d="M 753.1443 587.9194 C 752.4507 588.3139 751.7573 588.7084 751.0641 589.103 732.3656 599.7482 736.9143 608.2023 745.0825 621.4049 755.8766 638.8522 754.8943 643.419 733.717 656.6975 610.102 734.2061 482.2264 824.4407 388.5661 912.7194 366.4504 933.5644 338.1925 897.6161 356.2642 879.8194 408.6893 828.1922 454.0031 789.9509 517.1752 738.0502 550.111 710.9909 596.688 675.6575 625.4461 657.2958 645.5335 644.4702 639.4948 607.978 614.5499 601.9621"/>
+		<path id="track" d="M 619.3015 603.5634 C 611.8467 600.2818 602.241 599.9792 590.7513 604.656 531.2678 628.8681 467.5895 655.431 401.7259 683.616 298.4227 727.8226 196.0305 771.2103 96.0548 810.4306 71.9569 819.8842 49.6805 816.6115 33.2456 804.4488 23.8513 797.4965 9.5067 780.9864 8.7202 761.9779 7.0577 721.7961 15.136 685.2979 21.8802 645.3324 25.9033 621.4918 33.9271 597.5167 44.6111 575.9433 54.6641 555.644 67.9461 535.4963 84.0911 519.7142 103.4385 500.8018 126.8377 484.163 151.0877 471.8597 181.0728 456.6466 215.9245 450.9388 246.7968 437.1651 267.7669 427.8091 289.189 416.1979 304.8204 400.0779 327.4726 376.7179 341.7588 345.4984 361.6477 318.7251 383.2329 289.6681 403.1619 262.8129 429.2423 239.7651 437.4577 232.505 447.9961 226.1512 470.5168 230.1942 526.4741 240.2396 576.6681 254.874 633.2222 264.8887 653.2352 268.4327 675.4029 268.483 694.2368 262.496 735.6198 249.3412 779.266 231.0855 818.6585 209.856 845.8636 195.1946 869.7986 179.1189 894.0295 160.8051 904.0946 153.1977 910.3347 140.7892 916.7604 129.6996 935.0595 98.1188 945.5153 65.8733 967.0077 37.5796 977.0195 24.3994 996.4795 12.4169 1011.8711 9.4651 1025.5908 6.8339 1041.7596 9.7668 1055.5384 16.0451 1140.659 54.8299 1221.0064 93.3361 1303.1856 137.476 1312.3288 142.387 1325.2938 158.4972 1327.113 167.9832 1330.8768 187.6087 1329.6746 207.1224 1324.7202 227.8014 1320.5024 245.4061 1314.6497 265.5162 1301.9893 278.0487 1275.1697 304.5974 1240.6313 326.7885 1206.2802 345.0451 1053.1364 426.4367 896.2528 506.4464 751.064 589.1033L747.4001 591.3464C712.4314 611.9588 690.3014 622.633 674.5715 631.649 660.9987 639.4286 645.3805 633.1574 640.3256 624.0969 635.6122 615.6487 627.8885 607.4724 619.7632 603.7587 z"/>
+	</defs>
+	<g id="roads">
+		<g id="outline" stroke="white">
+			<use id="pit_gp_white" href="#pit_gp" stroke-width="7"/>
+			<use id="pit_white" href="#pit" stroke-width="7"/>
+			<use id="hairpin_white" href="#hairpin" stroke-width="17"/>
+			<use id="gp_white" href="#gp" stroke-width="17"/>
+			<use id="track_white" href="#track" stroke-width="17"/>
+		</g>
+		<g id="unused" stroke="#c8c8c8">
+			<use id="pit_gp_gray" href="#pit_gp" stroke-width="5"/>
+			<use id="hairpin_gray" href="#hairpin" stroke-width="15"/>
+			<use id="gp_gray" href="#gp" stroke-width="15"/>
+		</g>
+		<use id="pit_black" href="#pit" style="stroke:black;stroke-width:5"/>
+		<use id="track_black" href="#track" style="stroke:black;stroke-width:15"/>
+	</g>
+	<g id="start">
+		<polygon id="start_arrow" points="404,638 398,622 361,645" style="fill:red;stroke:white"/>
+		<rect id="checkered_flag" transform="matrix(0.93475939,-0.35528142,-0.35528142,-0.93475939,0,0)" y="-811.6889" x="123.50152" height="52" width="12" style="fill:url(#pattern4264);stroke:black"/>
+	</g>
+	<g id="north">
+		<text x="1075" y="721" stroke="white" style="font-size:125px">N</text>
+		<polygon id="compass" points="1200,630 1273,708 1271,709 1243,700 1238,729 1237,730" style="fill:red;stroke:white;stroke-width:2"/>
+	</g>
+	<g id="scale">
+		<path style="fill:black;stroke:white;stroke-width:2" d="M 654,840 V 861 H 1012 V 840 H 1008 V 857 H 925.5 V 849 H 921.5 V 857 H 835 V 844 H 831 V 857 H 746.5 V 849 H 742.5 V 857 H 658 V 840 Z"/>
+		<text stroke="white" x="833" y="833" style="font-size:20px;text-anchor:middle">1109 ft (338 m)</text>
+	</g>
+	<g id="wheatcroft" stroke="white" transform="rotate(-23)">
+		<text x="-101" y="728">Wheatcroft</text>
+		<text x="-101" y="768">Straight</text>
+	</g>
+	<g id="redgate">
+		<g id="one">
+			<circle r="27" cx="56" cy="766"/>
+			<text class="num" x="56" y="785">1</text>
+		</g>
+		<text stroke="white" x="32" y="722">Redgate</text>
+	</g>
+	<g id="craner">
+		<g id="two">
+			<circle r="27" cx="113" cy="553"/>
+			<text class="num" x="113" y="572">2</text>
+		</g>
+		<g id="three">
+			<circle r="27" cx="267" cy="376"/>
+			<text class="num" x="267" y="395">3</text>
+		</g>
+		<text stroke="white" transform="rotate(-20)" x="-38" y="532">Craner Curves</text>
+	</g>
+	<g id="old">
+		<g id="four">
+			<circle r="27" cx="456" cy="273"/>
+			<text class="num" x="456" y="292">4</text>
+		</g>
+		<text stroke="white" x="409" y="331">Old Hairpin</text>
+	</g>
+	<g id="five">
+		<circle r="27" cx="666" cy="225"/>
+		<text class="num" x="666" y="244">5</text>
+	</g>
+	<text stroke="white" x="507" y="615" transform="rotate(-29)">Starkey's Bridge</text>
+	<g id="six">
+		<circle r="27" cx="866" cy="126"/>
+		<text class="num" x="866" y="145">6</text>
+	</g>
+	<g id="mcleans">
+		<g id="seven">
+			<circle r="27" cx="1014" cy="52"/>
+			<text class="num" x="1014" y="71">7</text>
+		</g>
+		<text stroke="white" x="963" y="106">McLean's</text>
+	</g>
+	<g id="coppice">
+		<g id="eight">
+			<circle r="27" cx="1286" cy="180"/>
+			<text class="num" x="1286" y="199">8</text>
+		</g>
+		<text stroke="white" x="1146" y="190">Coppice</text>
+	</g>
+	<text stroke="white" x="677" y="892" transform="rotate(-27)">Starkey's Straight</text>
+	<g id="goddards">
+		<g id="nine">
+			<circle r="27" cx="628" cy="561"/>
+			<text class="num" x="628" y="580">9</text>
+		</g>
+		<text stroke="white" x="577" y="526">Goddards</text>
+	</g>
+</svg>
