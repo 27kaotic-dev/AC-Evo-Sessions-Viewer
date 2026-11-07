@@ -222,11 +222,11 @@ function statsBoard(sessions, tkey, car, since) {
     for (const e of s.entries) {
       if (car && e.car !== car) continue;
       const st = lapStats(e.laps);
-      if (!d.has(e.pid)) d.set(e.pid, { pid: e.pid, best: 0, sid: "", date: "", car: "", sessions: 0, laps: 0, valid: 0, sectors: [0, 0, 0], _s: new Set() });
+      if (!d.has(e.pid)) d.set(e.pid, { pid: e.pid, best: 0, sid: "", date: "", car: "", sessions: 0, laps: 0, valid: 0, sectors: [0, 0, 0], bsec: [0, 0, 0], _s: new Set() });
       const r = d.get(e.pid);
       r.laps += st.laps; r.valid += st.valid; r._s.add(s.id);
       for (let k = 0; k < 3; k++) if (st.sectors[k] && (!r.sectors[k] || st.sectors[k] < r.sectors[k])) r.sectors[k] = st.sectors[k];
-      if (st.best && (!r.best || st.best < r.best || (st.best === r.best && (s.date || "") < r.date))) { r.best = st.best; r.sid = s.id; r.date = s.date; r.car = e.car; }
+      if (st.best && (!r.best || st.best < r.best || (st.best === r.best && (s.date || "") < r.date))) { r.best = st.best; r.sid = s.id; r.date = s.date; r.car = e.car; r.bsec = e.laps[st.best_lap - 1].slice(1, 4); }
     }
   }
   const rows = [...d.values()].map((r) => { r.sessions = r._s.size; delete r._s; r.ideal = r.sectors.every((x) => x) ? r.sectors.reduce((a, b) => a + b, 0) : 0; return r; });
@@ -351,7 +351,7 @@ function statsH2h(sessions, a, b) {
     const board = statsBoard(sessions, k);
     const ra = board.find((r) => r.pid === a), rb = board.find((r) => r.pid === b);
     tracks.push({ tkey: k, track: ta.track, layout: ta.layout, a_best: ra.best, b_best: rb.best, gap: ra.best - rb.best, a_ideal: ra.ideal, b_ideal: rb.ideal,
-      a_sectors: ra.sectors, b_sectors: rb.sectors, a_sessions: ta.sessions, b_sessions: tb.sessions, a_pos: ra.pos, b_pos: rb.pos });
+      a_sectors: ra.sectors, b_sectors: rb.sectors, a_bsec: ra.bsec, b_bsec: rb.bsec, a_sessions: ta.sessions, b_sessions: tb.sessions, a_pos: ra.pos, b_pos: rb.pos });
   }
   tracks.sort((x, y) => cmpT([-(x.a_sessions + x.b_sessions), lc(x.track)], [-(y.a_sessions + y.b_sessions), lc(y.track)]));
   const together = [];

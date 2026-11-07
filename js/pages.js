@@ -192,23 +192,33 @@ const GAP2 = "Difference between the two times: - = the first driver is quicker,
 const SECTOR_COLORS = ["#4f8ef7", "#f2a93b", "#45b58a"];
 const kmNote = (km) => (km ? `The distance is an estimate: the lap length (${km} km) times the gap divided by the fastest lap, i.e. how far behind the leader would be at the same average speed.`
   : "Add this track's length (km) to lengths.csv in the track maps folder (and publish again) to also see the gap in metres.");
-/* rows = [{ name, color, segs: [[ms, color]...], label }]: one segment = a plain bar, several = a stacked bar, all on one scale */
-function gapBars(rows, legend, empty) {
-  if (!rows.length) return noData(empty);
-  const mx = Math.max(1, ...rows.map((r) => r.segs.reduce((a, s) => a + s[0], 0)));
-  return h("div", { class: "found" }, legend ? h("div", { class: "glegend" }, legend.map(([t, c]) => h("span", null, h("i", { style: { background: c } }), t))) : null,
-    rows.map((r) => { const tot = r.segs.reduce((a, s) => a + s[0], 0);
-      return h("div", { class: "frow" }, h("span", { class: "fname", text: r.name }),
-        h("span", { class: "ftrack" }, tot > 0 ? r.segs.map((s) => h("span", { class: "fbar", style: { width: (100 * s[0] / mx) + "%", background: s[1] } })) : h("span", { class: "fbar", style: { width: "3px", background: r.color } })),
-        h("span", { class: "fval", text: r.label })); }));
+/* two drivers on one radar: an axis for each measure, the dashed ring = the quickest time, a point further out = time lost.
+   axes = [[label, a_ms, b_ms]]; mx = the % slower at the outer ring */
+function radarSvg(title, axes, names, mx) {
+  const NS = "http://www.w3.org/2000/svg", W = 360, H = 350, cx = W / 2, cy = 195, R = 100, R0 = 34, n = axes.length;
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("width", "100%"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", title);
+  const el = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); if (text !== undefined) e.textContent = text; svg.append(e); return e; };
+  el("text", { x: cx, y: 20, "font-size": 14, "font-weight": 700, "text-anchor": "middle", fill: "currentColor" }, title);
+  if (n < 3) { el("text", { x: cx, y: H / 2, "font-size": 13, "text-anchor": "middle", fill: "currentColor", "fill-opacity": ".6" }, "Both drivers need all three sectors"); return svg; }
+  const ang = (i) => -Math.PI / 2 + i * 2 * Math.PI / n, pt = (i, r) => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
+  const rad = (pct) => R - (R - R0) * Math.min(pct / mx, 1), poly = (r) => axes.map((_, i) => pt(i, r).join(",")).join(" ");
+  [0, 1 / 3, 2 / 3].forEach((f) => el("polygon", { points: poly(R0 + (R - R0) * f), fill: "none", stroke: "currentColor", "stroke-opacity": ".12" }));
+  el("polygon", { points: poly(R), fill: "none", stroke: "currentColor", "stroke-opacity": ".6", "stroke-dasharray": "5 4" });
+  el("text", { x: cx + 8, y: cy - R + 13, "font-size": 10, fill: "currentColor", "fill-opacity": ".7" }, "quickest");
+  axes.forEach(([label, ta, tb], i) => {
+    const [x, y] = pt(i, R), side = Math.abs(Math.cos(ang(i))) > 0.5, g = Math.abs(ta - tb), [lx, ly] = pt(i, R + (side ? 22 : 34));
+    el("line", { x1: cx, y1: cy, x2: x, y2: y, stroke: "currentColor", "stroke-opacity": ".2" });
+    el("text", { x: lx, y: ly + (side ? -6 : 4), "font-size": 13, "font-weight": 600, "text-anchor": "middle", fill: "currentColor" }, label);
+    el("text", { x: lx, y: ly + (side ? 9 : 19), "font-size": 12, "text-anchor": "middle", fill: g ? (ta > tb ? H2H_A : H2H_B) : "currentColor", "fill-opacity": g ? 1 : .55 }, g ? "+" + (g / 1000).toFixed(3) : "equal");
+  });
+  [[1, H2H_A, names[0]], [2, H2H_B, names[1]]].forEach(([k, col, name]) => {
+    const pts = axes.map((a, i) => { const b = Math.min(a[1], a[2]); return pt(i, rad((a[k] - b) * 100 / b)); });
+    el("polygon", { points: pts.map((q) => q.join(",")).join(" "), fill: col, "fill-opacity": ".16", stroke: col, "stroke-width": 2 });
+    pts.forEach((q, i) => { const c = el("circle", { cx: q[0], cy: q[1], r: 4, fill: col }); c.append(el("title", {}, `${name}: ${axes[i][0]} ${fmtTime(axes[i][k])}`)); });
+  });
+  return svg;
 }
-function secGaps(list, sectors) {            // [{ pid-ish: name, color, sectors:[s1,s2,s3] }] -> stacked rows, each sector compared with the best of the group
-  const sb = [0, 1, 2].map((k) => Math.min(...list.map((r) => r.sectors[k])));
-  return list.map((r) => { const g = [0, 1, 2].map((k) => r.sectors[k] - sb[k]), tot = g[0] + g[1] + g[2];
-    return { name: r.name, color: r.color, tot, segs: g.map((v, k) => [v, SECTOR_COLORS[k]]),
-      label: tot <= 0 ? r.best : "+" + (tot / 1000).toFixed(3) + " s   S1 +" + (g[0] / 1000).toFixed(3) + "  S2 +" + (g[1] / 1000).toFixed(3) + "  S3 +" + (g[2] / 1000).toFixed(3) }; });
-}
-const SECTOR_LEGEND = [["Sector 1", SECTOR_COLORS[0]], ["Sector 2", SECTOR_COLORS[1]], ["Sector 3", SECTOR_COLORS[2]]];
 
 const RUN_COLORS = ["#4f8ef7", "#f2a93b", "#45b58a", "#c06ef0", "#ff6b81", "#2fd6d6"];
 const RUNSEL = { pid: "" };
@@ -624,7 +634,6 @@ function viewH2h() {
     { title: "Lap times (selected session)", make: () => lowerLaps() },
     { title: "Best lap over time (selected track)", make: () => lowerProgress() },
     { title: "Sectors (selected track)", make: () => lowerSectors() },
-    { title: "Gap (selected track)", make: () => lowerGap() },
   ], start);
   let low = makeLow(0);
   lowHolder.append(low.el);
@@ -649,24 +658,23 @@ function viewH2h() {
   function lowerSectors() {
     const x = res.tracks.find((t) => t.tkey === selTrack.v);
     if (!x) return noData("Pick a track in the Tracks tab.");
-    const trs = [0, 1, 2, 3].map((k) => {
-      const av = k < 3 ? x.a_sectors[k] : x.a_ideal, bv = k < 3 ? x.b_sectors[k] : x.b_ideal, gap = av && bv ? av - bv : 0;
-      return h("tr", null, td(k < 3 ? `Sector ${k + 1}` : "Ideal lap", "b"), td(av ? fmtTime(av) : "-", "r " + pc(gap < 0, "purple b")), td(bv ? fmtTime(bv) : "-", "r " + pc(gap > 0, "purple b")), gapTd(gap, gap < 0),
-        h("td", { class: "c b", style: { color: gap ? (gap < 0 ? H2H_A : H2H_B) : null }, text: gap ? (gap < 0 ? na : nb) : "-" }));
-    });
-    return table(["Sector", `${sa} best`, `${sb} best`, "Gap", "Faster"], trs, "", [null, `${sa}'s best time in this sector`, `${sb}'s best time in this sector`, GAP2, "The driver with the quicker time"]);
-  }
-  function lowerGap() {
-    const x = res.tracks.find((t) => t.tkey === selTrack.v);
-    if (!x || !x.a_best || !x.b_best) return noData("Pick a track in the Tracks tab where both drivers have a valid lap.");
-    const km = findKm(x.track, x.layout), best = Math.min(x.a_best, x.b_best);
-    const who = [[st.a, H2H_A, x.a_best, x.a_sectors], [st.b, H2H_B, x.b_best, x.b_sectors]];
-    const lap = who.map(([pid, col, t]) => ({ name: nameOf(pid), color: col, segs: [[t - best, col]], label: t === best ? "fastest  " + fmtTime(t) : gapLabel(t - best, best, km) + "   " + fmtTime(t) }));
-    const sec = who.every((q) => q[3].every((v) => v))
-      ? secGaps(who.map(([pid, col, , s]) => ({ name: nameOf(pid), color: col, sectors: s, best: "quicker in every sector" }))) : [];
-    return h("div", { class: "chartwrap" }, h("div", { class: "hint", text: "Best lap at the selected track" }), gapBars(lap, null, ""),
-      h("div", { class: "hint", text: "Best sectors at the selected track (each compared with the quicker of the two)" }), gapBars(sec, SECTOR_LEGEND, "Both drivers need all three sectors."),
-      h("div", { class: "hint", text: kmNote(km) }));
+    const km = findKm(x.track, x.layout), best = Math.min(x.a_best, x.b_best), ok = (u, v) => u.every((q) => q) && v.every((q) => q);
+    const bestAx = ok(x.a_bsec, x.b_bsec) ? [["Best lap", x.a_best, x.b_best], ...[0, 1, 2].map((k) => ["S" + (k + 1), x.a_bsec[k], x.b_bsec[k]])] : [];
+    const idealAx = ok(x.a_sectors, x.b_sectors) ? [["Ideal lap", x.a_ideal, x.b_ideal], ...[0, 1, 2].map((k) => ["S" + (k + 1), x.a_sectors[k], x.b_sectors[k]])] : [];
+    const mx = Math.max(0.05, ...[...bestAx, ...idealAx].map(([, p, q]) => Math.abs(p - q) * 100 / Math.min(p, q))) * 1.15;
+    const slow = x.a_best > x.b_best ? na : nb;
+    const note = x.a_best !== x.b_best ? `${slow} is ${gapLabel(Math.abs(x.a_best - x.b_best), best, km)} behind on the best lap. ` : "";
+    const grp = (t) => h("tr", { class: "grp" }, h("td", { colspan: 4, text: t }));
+    const line = ([label, av, bv]) => { const gap = av && bv ? av - bv : 0;
+      return h("tr", null, td(label, "b"), td(av ? fmtTime(av) : "-", "r " + pc(gap < 0, "purple b")), td(bv ? fmtTime(bv) : "-", "r " + pc(gap > 0, "purple b")), gapTd(gap, gap < 0)); };
+    const rows = [grp("Best lap and its sectors"), ...(bestAx.length ? bestAx.map(line) : [line(["Best lap", x.a_best, x.b_best])]),
+      grp("Ideal lap and best sectors"), ...(idealAx.length ? idealAx.map(line) : [])];
+    return h("div", { class: "chartwrap" },
+      h("div", { class: "rlegend" }, h("span", { style: { color: H2H_A }, text: "\u25a0 " + na }), h("span", { style: { color: H2H_B }, text: "\u25a0 " + nb })),
+      h("div", { class: "secsplit" },
+        h("div", { class: "radars" }, radarSvg("Best Lap / Sectors", bestAx, [na, nb], mx), radarSvg("Ideal Lap / Sectors", idealAx, [na, nb], mx)),
+        table(["Sector", sa, sb, "Gap"], rows, "", [null, `${sa}: the time`, `${sb}: the time`, GAP2])),
+      h("div", { class: "hint", text: note + "The dashed outer ring = the quickest time in that sector, a point pulled towards the centre = time lost. Under each name: what the slower driver lost. Both radars use the same scale. " + kmNote(km) }));
   }
   function drawLower() { const i = Math.max(0, low.index); clear(lowHolder); low = makeLow(i); lowHolder.append(low.el); }
   detail.append(upper.el, lowHolder);
