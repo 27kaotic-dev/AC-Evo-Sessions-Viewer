@@ -1,7 +1,7 @@
 {
  "format": 1,
  "app": "ACEVO Results Viewer",
- "updated": "2026-11-08T03:23:14",
+ "updated": "2026-11-08T03:42:40",
  "sessions": [
   {
    "id": "0e6f487092f1",
@@ -1198,6 +1198,20 @@
    "drivers": 2,
    "laps": 5,
    "fp": "66b27f77d630",
+   "cloud": true
+  },
+  {
+   "id": "bdbbb8c02443",
+   "file": "sessions/bdbbb8c02443.json",
+   "track": "Brands Hatch",
+   "layout": "GP",
+   "date": "2026-11-08",
+   "time": "16:42:38",
+   "type": "Race",
+   "weather": "",
+   "drivers": 2,
+   "laps": 22,
+   "fp": "70d4d615cdba",
    "cloud": true
   }
  ],
