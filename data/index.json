@@ -1,7 +1,7 @@
 {
  "format": 1,
  "app": "ACEVO Results Viewer",
- "updated": "2026-11-08T03:16:35",
+ "updated": "2026-11-08T03:23:14",
  "sessions": [
   {
    "id": "0e6f487092f1",
@@ -1184,6 +1184,20 @@
    "drivers": 4,
    "laps": 67,
    "fp": "9588dceea3c1",
+   "cloud": true
+  },
+  {
+   "id": "2878d4a26b19",
+   "file": "sessions/2878d4a26b19.json",
+   "track": "Brands Hatch",
+   "layout": "GP",
+   "date": "2026-11-08",
+   "time": "16:23:12",
+   "type": "Qualify",
+   "weather": "",
+   "drivers": 2,
+   "laps": 5,
+   "fp": "66b27f77d630",
    "cloud": true
   }
  ],
