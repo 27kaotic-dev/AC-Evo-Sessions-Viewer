@@ -1,7 +1,7 @@
 {
  "format": 1,
  "app": "ACEVO Results Viewer",
- "updated": "2026-11-09T07:38:44",
+ "updated": "2026-11-09T08:08:56",
  "sessions": [
   {
    "id": "0e6f487092f1",
@@ -1492,6 +1492,20 @@
    "drivers": 3,
    "laps": 32,
    "fp": "973fe85b928c",
+   "cloud": true
+  },
+  {
+   "id": "6ea07ac554cd",
+   "file": "sessions/6ea07ac554cd.json",
+   "track": "Brands Hatch",
+   "layout": "GP",
+   "date": "2026-11-09",
+   "time": "21:08:54",
+   "type": "Practice",
+   "weather": "",
+   "drivers": 2,
+   "laps": 17,
+   "fp": "0c3239678668",
    "cloud": true
   }
  ],
