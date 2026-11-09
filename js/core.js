@@ -220,7 +220,7 @@ function statsBoard(sessions, tkey, car, since) {
   for (const s of sessions) {
     if (trackKey(s.track, s.layout) !== tkey || (since && (s.date || "") < since)) continue;
     for (const e of s.entries) {
-      if (car && e.car !== car) continue;
+      if (car && (car instanceof Set ? car.size && !car.has(e.car) : e.car !== car)) continue;
       const st = lapStats(e.laps);
       if (!d.has(e.pid)) d.set(e.pid, { pid: e.pid, best: 0, sid: "", date: "", car: "", sessions: 0, laps: 0, valid: 0, sectors: [0, 0, 0], bsec: [0, 0, 0], _s: new Set() });
       const r = d.get(e.pid);
@@ -243,7 +243,7 @@ function statsHistory(sessions, tkey, car) {
     if (trackKey(s.track, s.layout) !== tkey) continue;
     let best = null;
     for (const e of s.entries) {
-      if (car && e.car !== car) continue;
+      if (car && (car instanceof Set ? car.size && !car.has(e.car) : e.car !== car)) continue;
       const st = lapStats(e.laps);
       if (st.best && (best === null || st.best < best.best)) best = { best: st.best, pid: e.pid, car: e.car };
     }

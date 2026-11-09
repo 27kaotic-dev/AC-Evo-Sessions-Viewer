@@ -19,6 +19,17 @@ function niceTicks(lo, hi, step, anchor = null) {
   return out;
 }
 
+/* a small marker: 0 circle, 1 square, 2 triangle, 3 diamond, 4 plus (the cars in a multi-car chart) */
+function drawMark(g, shape, x, y, r) {
+  g.beginPath();
+  if (shape === 1) g.rect(x - r, y - r, 2 * r, 2 * r);
+  else if (shape === 2) { g.moveTo(x, y - r * 1.2); g.lineTo(x + r * 1.1, y + r * 0.9); g.lineTo(x - r * 1.1, y + r * 0.9); g.closePath(); }
+  else if (shape === 3) { g.moveTo(x, y - r * 1.3); g.lineTo(x + r * 1.3, y); g.lineTo(x, y + r * 1.3); g.lineTo(x - r * 1.3, y); g.closePath(); }
+  else if (shape === 4) { const w = r * 0.45, q = r * 1.2; g.moveTo(x - w, y - q); g.lineTo(x + w, y - q); g.lineTo(x + w, y - w); g.lineTo(x + q, y - w); g.lineTo(x + q, y + w); g.lineTo(x + w, y + w); g.lineTo(x + w, y + q); g.lineTo(x - w, y + q); g.lineTo(x - w, y + w); g.lineTo(x - q, y + w); g.lineTo(x - q, y - w); g.lineTo(x - w, y - w); g.closePath(); }
+  else g.arc(x, y, r, 0, Math.PI * 2);
+  g.fill();
+}
+
 class LineChart {
   constructor(canvas) {
     this.cv = canvas;
@@ -93,7 +104,8 @@ class LineChart {
     }
     const narrow = W < 640;
     const legendW = narrow ? 112 : 170;
-    const l = narrow ? 46 : 62, t = 16, r = legendW + 16, b = 38;
+    const rot = Object.keys(this.xlabels).length > 0;                       // dates under the axis slant upwards
+    const l = narrow ? 46 : 62, t = 16, r = legendW + 16, b = rot ? 64 : 38;
     const plot = { left: l, top: t, w: Math.max(50, W - l - r), h: Math.max(50, H - t - b) };
     plot.right = plot.left + plot.w; plot.bottom = plot.top + plot.h;
     const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
@@ -120,14 +132,16 @@ class LineChart {
       g.strokeStyle = C.border; g.lineWidth = 1; g.beginPath(); g.moveTo(plot.left, yy); g.lineTo(plot.right, yy); g.stroke();
       g.fillStyle = C.dim; g.textAlign = "right"; g.textBaseline = "middle"; g.fillText(o.yfmt(v), l - 8, yy);
     }
-    const xticks = [...new Set(xs)].sort((a, b2) => a - b2);
-    const xstep = Math.max(1, Math.floor(xticks.length / (narrow ? 8 : 14)));
+    const xticks = o.xticks ? o.xticks.slice() : [...new Set(xs)].sort((a, b2) => a - b2);
+    const xstep = o.xticks ? Math.max(1, Math.ceil(xticks.length / (narrow ? 4 : 9))) : Math.max(1, Math.floor(xticks.length / (narrow ? 8 : 14)));
     xticks.forEach((xv, i) => {
       if (i % xstep) return;
       const xx = mx(xv);
       g.strokeStyle = C.border; g.beginPath(); g.moveTo(xx, plot.top); g.lineTo(xx, plot.bottom); g.stroke();
       const lab = this.xlabels[xv] ?? (Number.isInteger(xv) ? String(xv) : String(xv));
-      g.fillStyle = C.dim; g.textAlign = "center"; g.textBaseline = "top"; g.fillText(lab, xx, plot.bottom + 8);
+      g.fillStyle = C.dim;
+      if (rot && this.xlabels[xv] !== undefined) { g.save(); g.translate(xx + 4, plot.bottom + 8); g.rotate(-Math.PI / 4); g.textAlign = "right"; g.textBaseline = "middle"; g.fillText(lab, 0, 0); g.restore(); }
+      else { g.textAlign = "center"; g.textBaseline = "top"; g.fillText(lab, xx, plot.bottom + 8); }
     });
     this.geo = { plot, mx, my, xmin, xmax };
     if (o.ycap) {                                          // lines that go beyond the cap run along the top edge
@@ -163,10 +177,10 @@ class LineChart {
         s.pts.forEach(([x, y], j) => (j && !LineChart.broken(s, s.pts[j - 1][0], x) ? g.lineTo(mx(x), my(y)) : g.moveTo(mx(x), my(y))));
         g.stroke();
       }
-      if (o.dots || s.pts.length <= 40 || i === hov) {
+      if (o.dots || s.pts.length <= 40 || i === hov || s.marks) {
         g.fillStyle = col;
         const rad = o.dots ? (i === hov ? 6.5 : 5) : (o.bigdots ? (i === hov ? 5.6 : 4.6) : (i === hov ? 4.2 : 3));
-        for (const [x, y] of s.pts) { g.beginPath(); g.arc(mx(x), my(y), rad, 0, Math.PI * 2); g.fill(); }
+        for (const [x, y] of s.pts) { const m = s.marks && s.marks[x]; if (m) drawMark(g, m[0], mx(x), my(y), rad); else { g.beginPath(); g.arc(mx(x), my(y), rad, 0, Math.PI * 2); g.fill(); } }
       }
       g.globalAlpha = 1;
     }
@@ -193,12 +207,21 @@ class LineChart {
       ly += 18;
     }
     g.font = "11px 'Segoe UI', system-ui, sans-serif";
+    if (o.shapeKey) {                                       // which marker is which car
+      ly += 6;
+      for (const [sh, name] of o.shapeKey) {
+        if (ly > H - 24) break;
+        g.fillStyle = C.dim; drawMark(g, sh, W - legendW + 10, ly + 8, 4);
+        g.fillStyle = C.text; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(this.elide(g, name, legendW - 30), W - legendW + 22, ly + 8);
+        ly += 18;
+      }
+    }
     // the value at the point nearest the mouse
     if (hov !== null && this.hoverPt) {
       const [x, y] = this.hoverPt, px = mx(x), py = my(y);
       const s = this.series[hov], col = safeColor(s.color);
-      const xl = this.xlabels[x] ?? String(x);
-      const line2 = `${xl}   ${o.yfmt(y)}`;
+      const xl = (o.xhover && o.xhover[x]) ?? this.xlabels[x] ?? String(x);
+      const mk = s.marks && s.marks[x], line2 = `${xl}   ${o.yfmt(y)}` + (mk ? `   ${mk[1]}` : "");
       g.font = "bold 11px 'Segoe UI', system-ui, sans-serif"; const w1 = g.measureText(s.label).width;
       g.font = "11px 'Segoe UI', system-ui, sans-serif"; const w2 = g.measureText(line2).width;
       const bw = Math.max(w1, w2) + 20, bh = 40;

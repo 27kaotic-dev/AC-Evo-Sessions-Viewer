@@ -622,21 +622,69 @@ function viewH2h() {
       h("td", { class: "c b", style: { color: af ? H2H_A : bf ? H2H_B : null }, text: af ? na : bf ? nb : "-" })] };
   });
   const upper = tabset([
-    { title: "Tracks", make: () => listTable(["Track", `${sa} best`, `${sb} best`, "Gap", `${sa} ideal`, `${sb} ideal`, `${sa} sessions`, `${sb} sessions`, "Faster"], trk, (id) => { selTrack.v = id; const nx = tog.find((q) => { const s0 = ss.find((z) => z.id === q.id), x0 = res.together.find((z) => z.sid === q.id); return s0 && x0.a_best && x0.b_best && trackKey(s0.track, s0.layout) === id; }); if (nx) selSess.v = nx.id; markRows(upper.el, id); drawLower(); }, selTrack.v,
+    { title: "Tracks", make: () => listTable(["Track", `${sa} best`, `${sb} best`, "Gap", `${sa} ideal`, `${sb} ideal`, `${sa} sessions`, `${sb} sessions`, "Faster"], trk, (id) => { selTrack.v = id; markRows(upper.el, id); drawLower(low.index); }, selTrack.v,
       [null, `${sa}'s best lap at this track`, `${sb}'s best lap at this track`, GAP2, `${sa}'s best sectors added together`, `${sb}'s best sectors added together`, `Sessions ${sa} has driven here`, `Sessions ${sb} has driven here`, "The driver with the quicker best lap"]) },
     { title: "Sessions together", make: () => tog.length ? listTable(["Date", "Track", "Type", `${sa} best`, `${sb} best`, "Gap", `${sa} laps`, `${sb} laps`, `${sa} consistency`, `${sb} consistency`, "Faster"], tog,
-      (id) => { selSess.v = id; markRows(upper.el, id); drawLower(); }, selSess.v,
+      (id) => { selSess.v = id; markRows(upper.el, id); drawLower(0); }, selSess.v,
       [null, null, null, `${sa}'s best lap in that session`, `${sb}'s best lap in that session`, GAP2, `Laps ${sa} drove in that session`, `Laps ${sb} drove in that session`, `${sa}'s consistency in that session`, `${sb}'s consistency in that session`, "The driver with the quicker best lap in that session"]) : noData("They have not driven in the same session.") },
   ]);
   function markRows(el, id) { el.querySelectorAll(".pane:not([hidden]) tr.link").forEach((tr) => tr.classList.toggle("focus", tr.id === "row-" + id)); }
+  const selCar = { v: new Set() };          // empty = all cars
+  const MARKS = ["\u25cf", "\u25a0", "\u25b2", "\u25c6", "\u271a"];
+  const hereSess = () => ss.filter((x) => trackKey(x.track, x.layout) === selTrack.v);
+  /* the car box: the cars either driver used at the selected track */
+  const carList = () => [...new Set(hereSess().flatMap((x) => [st.a, st.b].map((pid) => x.entries.find((q) => q.pid === pid)).filter((e) => e && e.car).map((e) => e.car)))].sort((p, q) => cmp(lc(p), lc(q)));
+  const shapeOf = (c) => Math.max(0, carList().indexOf(c)) % MARKS.length;
+  function redrawBody() { const i = Math.max(0, low.index), old = low.el; low = makeLow(i); old.replaceWith(low.el); }
+  function carPicker() {
+    const cars = carList();
+    [...selCar.v].forEach((c) => { if (!cars.includes(c)) selCar.v.delete(c); });
+    const label = () => (selCar.v.size === 0 ? "All cars" : selCar.v.size === 1 ? [...selCar.v][0] : selCar.v.size + " cars");
+    const sum = h("summary", { text: label() });
+    const boxes = cars.map((c, i) => { const cb = h("input", { type: "checkbox", checked: selCar.v.has(c), onchange: () => { if (cb.checked) selCar.v.add(c); else selCar.v.delete(c); sum.textContent = label(); redrawBody(); } });
+      return h("label", { class: "carrow" }, cb, h("span", { class: "carmark", text: MARKS[i % MARKS.length] }), h("span", { text: c })); });
+    const all = h("button", { class: "btn", type: "button", text: "All cars", onclick: () => { selCar.v.clear(); boxes.forEach((l) => { l.firstChild.checked = false; }); sum.textContent = label(); redrawBody(); } });
+    return field("Car:", h("details", { class: "carpick" }, sum, h("div", { class: "carmenu" }, all, boxes)));
+  }
+  const carOk = (e) => e && (selCar.v.size === 0 || selCar.v.has(e.car));
+  const shapeKey = (used) => (used.size > 1 ? [...used].sort((p, q) => shapeOf(p) - shapeOf(q)).map((c) => [shapeOf(c), c]) : null);
   const lowHolder = h("div");
-  const makeLow = (start) => tabset([
-    { title: "Lap times (selected session)", make: () => lowerLaps() },
+  let mode = "track";          // the Tracks tab above has the track charts, the Sessions together tab the session chart
+  const makeLow = (start) => tabset(mode === "track" ? [
+    { title: "Lap times (selected track)", make: () => lowerTrackLaps() },
     { title: "Best lap over time (selected track)", make: () => lowerProgress() },
     { title: "Sectors (selected track)", make: () => lowerSectors() },
+  ] : [
+    { title: "Lap times (selected session)", make: () => lowerLaps() },
   ], start);
   let low = makeLow(0);
-  lowHolder.append(low.el);
+  lowHolder.append(...(mode === "track" ? [pickerBar(carPicker())] : []), low.el);
+  function lowerTrackLaps() {
+    const here = hereSess();
+    if (!here.length) return noData("Pick a track in the Tracks tab.");
+    const used = new Set(), pct = outlierPct(), xt = [], xl = {}, xh = {}, links = {}, sers = [[st.a, H2H_A], [st.b, H2H_B]].map(([pid, col]) => ({ label: nameOf(pid), color: col, gaps: [], pts: [], marks: {} }));
+    let off = 0;
+    here.forEach((sess) => {
+      const es = [st.a, st.b].map((pid) => { const e = sess.entries.find((q) => q.pid === pid); return carOk(e) ? e : null; });
+      const n = Math.max(0, ...es.map((e) => (e ? e.laps.length : 0)));
+      if (!n) return;
+      xt.push(off + 1); xl[off + 1] = fmtDate(sess.date);
+      for (let i = 1; i <= n; i++) { xh[off + i] = `${fmtDate(sess.date)}  lap ${i}`; links[off + i] = sess.id; }
+      es.forEach((e, k) => {
+        sers[k].gaps.push(off + n + 1, off);
+        if (!e) return;
+        const out = lapOutliers(e.laps, pct);
+        out.forEach((v) => sers[k].gaps.push(off + v));
+        e.laps.forEach((l, i) => { if (l[4] && l[0] > 0 && !out.has(i + 1)) { sers[k].pts.push([off + i + 1, l[0]]); sers[k].marks[off + i + 1] = [shapeOf(e.car), e.car]; used.add(e.car); } });
+      });
+      off += n + 1;
+    });
+    const series = sers.filter((q) => q.pts.length), sk = shapeKey(used);
+    if (!sk) series.forEach((q) => { delete q.marks; });
+    return h("div", null, pickerBar(outlierPicker(drawLower)),
+      lineBox(series, { xlabels: xl, xhover: xh, xticks: xt, links: series.map(() => links), shapeKey: sk },
+        "Every valid lap at this track, every session one after the other (oldest first, each labelled with its date, a gap between sessions). Use the Car box to pick one car or several (a different marker for each). A lap further from the driver's median lap than the Show laps choice is left out and shows as a gap." + CLICK_HINT, 380));
+  }
   function lowerLaps() {
     const sess = ss.find((x) => x.id === selSess.v);
     if (!sess) return noData("Pick a session in the Sessions together tab.");
@@ -648,16 +696,23 @@ function viewH2h() {
         `Every valid lap of the session on ${fmtDate(sess.date)}. A lap further from the driver's median lap than the Show laps choice is left out and shows as a gap.` + CLICK_HINT, 380));
   }
   function lowerProgress() {
-    const here = ss.filter((x) => trackKey(x.track, x.layout) === selTrack.v), xl = {}, links = {};
+    const here = hereSess(), xl = {}, links = {}, used = new Set();
     here.forEach((x, i) => { xl[i + 1] = fmtDate(x.date); links[i + 1] = x.id; });
-    const series = [[st.a, H2H_A], [st.b, H2H_B]].map(([pid, col]) => { const pts = [];
-      here.forEach((x, i) => { const e = x.entries.find((q) => q.pid === pid); const l = e ? lapStats(e.laps) : null; if (l && l.best) pts.push([i + 1, l.best]); });
-      return { label: nameOf(pid), color: col, pts }; }).filter((q) => q.pts.length);
-    return lineBox(series, { xlabels: xl, links }, "The best lap of each session at the track, oldest first (labelled with the date)." + CLICK_HINT, 380);
+    const series = [[st.a, H2H_A], [st.b, H2H_B]].map(([pid, col]) => { const pts = [], marks = {};
+      here.forEach((x, i) => { const e = x.entries.find((q) => q.pid === pid); const l = carOk(e) ? lapStats(e.laps) : null; if (l && l.best) { pts.push([i + 1, l.best]); marks[i + 1] = [shapeOf(e.car), e.car]; used.add(e.car); } });
+      return { label: nameOf(pid), color: col, pts, marks }; }).filter((q) => q.pts.length), sk = shapeKey(used);
+    if (!sk) series.forEach((q) => { delete q.marks; });
+    return h("div", null,
+      lineBox(series, { xlabels: xl, links, shapeKey: sk }, "The best lap of each session at the track, oldest first (labelled with the date). Use the Car box to pick one car or several (a different marker for each)." + CLICK_HINT, 380));
   }
   function lowerSectors() {
-    const x = res.tracks.find((t) => t.tkey === selTrack.v);
+    let x = res.tracks.find((t) => t.tkey === selTrack.v);
     if (!x) return noData("Pick a track in the Tracks tab.");
+    if (selCar.v.size) {                              // only the laps in the chosen cars
+      const bd = statsBoard(ss, selTrack.v, selCar.v), ra = bd.find((r) => r.pid === st.a), rb = bd.find((r) => r.pid === st.b);
+      if (!ra || !rb || !ra.best || !rb.best) return h("div", null, noData("They do not both have a lap in the chosen car(s) at this track."));
+      x = Object.assign({}, x, { a_best: ra.best, b_best: rb.best, a_ideal: ra.ideal, b_ideal: rb.ideal, a_sectors: ra.sectors, b_sectors: rb.sectors, a_bsec: ra.bsec, b_bsec: rb.bsec });
+    }
     const km = findKm(x.track, x.layout), best = Math.min(x.a_best, x.b_best), ok = (u, v) => u.every((q) => q) && v.every((q) => q);
     const bestAx = ok(x.a_bsec, x.b_bsec) ? [["Best lap", x.a_best, x.b_best], ...[0, 1, 2].map((k) => ["S" + (k + 1), x.a_bsec[k], x.b_bsec[k]])] : [];
     const idealAx = ok(x.a_sectors, x.b_sectors) ? [["Ideal lap", x.a_ideal, x.b_ideal], ...[0, 1, 2].map((k) => ["S" + (k + 1), x.a_sectors[k], x.b_sectors[k]])] : [];
@@ -676,7 +731,8 @@ function viewH2h() {
         table(["Sector", sa, sb, "Gap"], rows, "", [null, `${sa}: the time`, `${sb}: the time`, GAP2])),
       h("div", { class: "hint", text: note + "The dashed outer ring = the quickest time in that sector, a point pulled towards the centre = time lost. Under each name: what the slower driver lost. Both radars use the same scale. " + kmNote(km) }));
   }
-  function drawLower() { const i = Math.max(0, low.index); clear(lowHolder); low = makeLow(i); lowHolder.append(low.el); }
+  function drawLower(to) { const i = typeof to === "number" ? to : Math.max(0, low.index); clear(lowHolder); low = makeLow(i); lowHolder.append(...(mode === "track" ? [pickerBar(carPicker())] : []), low.el); }
+  [...upper.el.firstChild.children].forEach((b, i) => b.addEventListener("click", () => { const m = i === 0 ? "track" : "session"; if (m !== mode) { mode = m; drawLower(0); } }));
   detail.append(upper.el, lowHolder);
   return root;
 }

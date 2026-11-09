@@ -148,5 +148,5 @@ function fmtDate(iso) {
   const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!m) return String(iso || "");
   const t = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
-  return isNaN(t) ? String(iso) : t.toLocaleDateString(undefined, { timeZone: "UTC", year: "numeric", month: "2-digit", day: "2-digit" });
+  return isNaN(t) ? String(iso) : t.toLocaleDateString(undefined, { timeZone: "UTC", year: "2-digit", month: "2-digit", day: "2-digit" });
 }
