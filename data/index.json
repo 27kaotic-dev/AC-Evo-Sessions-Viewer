@@ -1,7 +1,7 @@
 {
  "format": 1,
  "app": "ACEVO Results Viewer",
- "updated": "2026-11-12T11:17:14",
+ "updated": "2026-11-12T13:38:28",
  "sessions": [
   {
    "id": "0e6f487092f1",
@@ -1856,6 +1856,20 @@
    "drivers": 1,
    "laps": 1,
    "fp": "8d755a0a3826",
+   "cloud": true
+  },
+  {
+   "id": "c6dba03ae404",
+   "file": "sessions/c6dba03ae404.json",
+   "track": "Nurburgring",
+   "layout": "Nordschleife",
+   "date": "2026-11-13",
+   "time": "02:38:27",
+   "type": "Practice",
+   "weather": "",
+   "drivers": 1,
+   "laps": 1,
+   "fp": "8aaa4049c168",
    "cloud": true
   }
  ],
