@@ -1,7 +1,7 @@
 {
  "format": 1,
  "app": "ACEVO Results Viewer",
- "updated": "2026-11-14T08:33:26",
+ "updated": "2026-11-14T09:11:58",
  "sessions": [
   {
    "id": "0e6f487092f1",
@@ -1996,6 +1996,20 @@
    "drivers": 2,
    "laps": 9,
    "fp": "5204cc474de5",
+   "cloud": true
+  },
+  {
+   "id": "3ed2419a0feb",
+   "file": "sessions/3ed2419a0feb.json",
+   "track": "Fuji Speedway",
+   "layout": "GP Short",
+   "date": "2026-11-14",
+   "time": "22:11:56",
+   "type": "Practice",
+   "weather": "",
+   "drivers": 2,
+   "laps": 11,
+   "fp": "01b7ad9c3310",
    "cloud": true
   }
  ],
