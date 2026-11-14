@@ -255,6 +255,17 @@ function statsHistory(sessions, tkey, car) {
   return pts;
 }
 
+/* only the sessions from this date on (since, YYYY-MM-DD) with this weather ("" = any, "-" = not set) */
+function filterSessions(sessions, since, wx) {
+  return sessions.filter((s) => (!since || (s.date || "") >= since) && (!wx || (wx === "-" ? !s.weather : s.weather === wx)));
+}
+
+/* only the entries in these cars (an empty set = all): every rank, record and gap then compares like with like */
+function filterCars(sessions, cars) {
+  if (!cars || !cars.size) return sessions;
+  return sessions.map((s) => { const es = s.entries.filter((e) => cars.has(e.car)); return es.length ? Object.assign({}, s, { entries: es }) : null; }).filter(Boolean);
+}
+
 function statsDrivers(sessions) {
   const d = new Map();
   for (const s of sessions) {

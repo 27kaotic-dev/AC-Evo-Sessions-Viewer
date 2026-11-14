@@ -4,7 +4,7 @@
 const H2H_A = "#ff3d4f", H2H_B = "#4da3ff";                      // the two drivers of a head to head
 const DRIVER_COLORS = ["#ff3d4f", "#4da3ff", "#ffc83d", "#3ddc84", "#b061ff", "#ff8a3d", "#2fd6d6", "#ff6bb5", "#9ad14b", "#7d8cff",
   "#e0c36a", "#5ee0b0", "#d96b6b", "#6bb5d9", "#c28cff", "#ffa94d"];
-const P = { sessions: { track: "", type: "", weather: "", sel: "" }, tracks: { sel: "", car: "", period: 0, weather: "" }, drivers: { sel: "" }, h2h: { a: "", b: "" } };
+const P = { sessions: { track: "", type: "", weather: "", sel: "" }, tracks: { sel: "", cars: new Set(), period: 0, weather: "" }, drivers: { sel: "", cars: new Set(), period: 0, weather: "" }, h2h: { a: "", b: "", period: 0, weather: "" } };
 
 /* ---------------------------------------------------------------- shared bits */
 const allSessions = () => S.sessions;
@@ -406,13 +406,13 @@ function viewTracks() {
     clear(detail);
     const x = tracks.find((t) => t.tkey === st.sel);
     if (!x) return;
-    if (st.car && !x.cars.includes(st.car)) st.car = "";
-    const car = st.car || null, since = periodSince(PERIODS[st.period][1]);
+    [...st.cars].forEach((c) => { if (!x.cars.includes(c)) st.cars.delete(c); });
+    const car = st.cars.size ? st.cars : null, since = periodSince(PERIODS[st.period][1]);
     const sw = ss0.filter((s) => weatherOk(s, st.weather));
     const board = statsBoard(sw, x.tkey, car, since).filter((r) => r.best);
-    const here = sw.filter((s) => trackKey(s.track, s.layout) === x.tkey && (!since || s.date >= since) && (!car || s.entries.some((e) => e.car === car)));
-    const bar = pickerBar(selectOf("Track:", st.sel, tracks.map((t) => [t.tkey, `${trackLabel(t.track, t.layout)}  (${t.sessions} session${t.sessions === 1 ? "" : "s"})`]), (v) => { st.sel = v; st.car = ""; drawDetail(); }),
-      selectOf("Car:", st.car, [["", "All cars"], ...x.cars.map((c) => [c, c])], (v) => { st.car = v; drawDetail(); }),
+    const here = sw.filter((s) => trackKey(s.track, s.layout) === x.tkey && (!since || s.date >= since) && (!car || s.entries.some((e) => car.has(e.car))));
+    const bar = pickerBar(selectOf("Track:", st.sel, tracks.map((t) => [t.tkey, `${trackLabel(t.track, t.layout)}  (${t.sessions} session${t.sessions === 1 ? "" : "s"})`]), (v) => { st.sel = v; drawDetail(); }),
+      carTickBox(x.cars, st.cars, drawDetail),
       selectOf("Period:", st.period, PERIODS.map(([t], i) => [i, t]), (v) => { st.period = +v; drawDetail(); }),
       selectOf("Weather:", st.weather, WEATHERS, (v) => { st.weather = v; drawDetail(); }), h("span", { class: "grow" }),
       csvButton(() => visibleTable(detail), () => `${x.track}_${x.layout}_leaderboard`));
@@ -433,7 +433,10 @@ function viewTracks() {
         if (!pts.length) return noData("No laps for this choice (try another car or period).");
         let low = 0, cur = ""; const run = [], rec = [], xl = {}, links = {}, recLinks = {};
         pts.forEach((p, i) => { if (!low || p.best < low) { low = p.best; cur = p.sid; } run.push([i + 1, p.best]); rec.push([i + 1, low]); xl[i + 1] = fmtDate(p.date); links[i + 1] = p.sid; recLinks[i + 1] = cur; });
-        return lineBox([{ label: "Fastest lap of the session", color: DRIVER_COLORS[1], pts: run }, { label: "Track record", color: DRIVER_COLORS[0], pts: rec }], { xlabels: xl, links: [links, recLinks] },
+        const used = new Set(pts.map((p) => p.car)), shp = (c) => Math.max(0, x.cars.indexOf(c)) % CAR_MARKS.length, marks = {};
+        if (used.size > 1) pts.forEach((p, i) => { marks[i + 1] = [shp(p.car), p.car]; });
+        return lineBox([{ label: "Fastest lap of the session", color: DRIVER_COLORS[1], pts: run, marks: used.size > 1 ? marks : undefined }, { label: "Track record", color: DRIVER_COLORS[0], pts: rec }],
+          { xlabels: xl, links: [links, recLinks], shapeKey: used.size > 1 ? [...used].sort((p, q) => shp(p) - shp(q)).map((c) => [shp(c), c]) : null },
           "Left to right = the sessions at this track, oldest first (labelled with their date). Blue = the fastest valid lap of each session  ·  red = the track record so far." + CLICK_HINT);
       } },
       { title: "Best sectors", make: () => {
@@ -456,22 +459,43 @@ function viewTracks() {
   return root;
 }
 
+/* the tick list of cars (nothing ticked = all cars); `cars` is the list to choose from, `sel` the Set that is kept, `onchange` runs after a tick */
+let CAR_REOPEN = false;
+function reopenRun(fn) { CAR_REOPEN = true; try { fn(); } finally { setTimeout(() => { CAR_REOPEN = false; }, 0); } }
+const CAR_MARKS = ["\u25cf", "\u25a0", "\u25b2", "\u25c6", "\u271a"];
+function carTickBox(cars, sel, onchange) {
+  [...sel].forEach((c) => { if (!cars.includes(c)) sel.delete(c); });
+  const label = () => (sel.size === 0 ? "All cars" : sel.size === 1 ? [...sel][0] : sel.size + " cars");
+  const sum = h("summary", { text: label() });
+  const boxes = cars.map((c, i) => { const cb = h("input", { type: "checkbox", checked: sel.has(c), onchange: () => { if (cb.checked) sel.add(c); else sel.delete(c); sum.textContent = label(); reopenRun(onchange); } });
+    return h("label", { class: "carrow" }, cb, h("span", { class: "carmark", text: CAR_MARKS[i % CAR_MARKS.length] }), h("span", { text: c })); });
+  const all = h("button", { class: "btn", type: "button", text: "All cars", onclick: () => { sel.clear(); boxes.forEach((l) => { l.firstChild.checked = false; }); sum.textContent = label(); reopenRun(onchange); } });
+  return field("Car:", h("details", { class: "carpick", open: CAR_REOPEN }, sum, h("div", { class: "carmenu" }, all, boxes)));
+}
+
 /* ---------------------------------------------------------------- drivers */
 function viewDrivers() {
   const root = h("div", { class: "page" });
-  const st = P.drivers, ss = sortedSessions(allSessions());
-  const rows = statsDrivers(ss).sort((a, b) => cmpT([-a.records, -a.sessions, lc(nameOf(a.pid))], [-b.records, -b.sessions, lc(nameOf(b.pid))]));
+  const st = P.drivers, ssAll = sortedSessions(allSessions());
+  if (!st.cars) st.cars = new Set();
+  const rows = statsDrivers(ssAll).sort((a, b) => cmpT([-a.records, -a.sessions, lc(nameOf(a.pid))], [-b.records, -b.sessions, lc(nameOf(b.pid))]));
   if (!rows.some((r) => r.pid === st.sel)) st.sel = rows.length ? rows[0].pid : "";
   const detail = h("div");
-  const dsel = h("select", { "aria-label": "Driver", onchange: () => { st.sel = dsel.value; drawDetail(); } },
+  const carSlot = h("span", { class: "carslot" });
+  const driverCars = () => [...new Set(ssAll.flatMap((s) => s.entries.filter((e) => e.pid === st.sel && e.car).map((e) => e.car)))].sort((p, q) => cmp(lc(p), lc(q)));
+  const refreshCars = () => { clear(carSlot); carSlot.append(carTickBox(driverCars(), st.cars, drawDetail)); };
+  const dsel = h("select", { "aria-label": "Driver", onchange: () => { st.sel = dsel.value; refreshCars(); drawDetail(); } },
     [...rows].sort((a, b) => cmp(lc(nameOf(a.pid)), lc(nameOf(b.pid)))).map((r) => option(r.pid, nameOf(r.pid), r.pid === st.sel)));
-  if (rows.length) root.append(pickerBar(field("Driver:", dsel)));
+  if (rows.length) {
+    root.append(pickerBar(field("Driver:", dsel), selectOf("Period:", st.period, PERIODS.map(([t], i) => [i, t]), (v) => { st.period = +v; drawDetail(); }),
+      selectOf("Weather:", st.weather, WEATHERS, (v) => { st.weather = v; drawDetail(); }), carSlot)); refreshCars();
+  }
   else root.append(noData("No sessions yet."));
   root.append(detail);
   function drawDetail() {
     clear(detail);
-    const pid = st.sel, me = rows.find((r) => r.pid === pid);
-    if (!me) return;
+    const pid = st.sel, ss = filterCars(filterSessions(ssAll, periodSince(PERIODS[st.period][1]), st.weather), st.cars), me = statsDrivers(ss).find((r) => r.pid === pid);
+    if (!me) { detail.append(noData("This driver has no laps for this choice of car, period and weather.")); return; }
     const car = statsCareer(ss, pid);
     const chips = h("div", { class: "chips" }, chip("Driver", nameOf(pid)), chip("Sessions", me.sessions), chip("Laps", `${me.valid} valid of ${me.laps}`), chip("Tracks", me.tracks),
       chip("Records held", me.records || "-", me.records ? cssVar("--purple") : null),
@@ -484,8 +508,15 @@ function viewDrivers() {
       chips.append(...[chip("Valid laps", laps ? Math.round(100 * valid / laps) + "%" : "-"), km ? chip("Distance driven", Math.round(km).toLocaleString() + " km") : null,
         chip("Favourite track", `${trackLabel(f0.track, f0.layout)}  (${ft[tk]})`), chip("Favourite car", car0 || "-")].filter(Boolean));
     }
-    const formChart = (series, fmt, unit, zero, title) => lineBox(series, { xlabels: Object.fromEntries(form.map((f, i) => [i + 1, fmtDate(f.date)])),
-      links: series.map(() => Object.fromEntries(form.map((f, i) => [i + 1, f.sid]))), yfmt: fmt, unit, zero }, title + CLICK_HINT, 300);
+    const carList = driverCars(), shapeOf = (c) => Math.max(0, carList.indexOf(c)) % CAR_MARKS.length;
+    /* a different marker per car when the entries use more than one car */
+    const carMk = (arr) => { const used = new Set(arr.map((f) => f.car)); if (used.size < 2) return null;
+      const marks = {}; arr.forEach((f, i) => { marks[i + 1] = [shapeOf(f.car), f.car]; });
+      return { marks, key: [...used].sort((p, q) => shapeOf(p) - shapeOf(q)).map((c) => [shapeOf(c), c]) }; };
+    const formChart = (series, fmt, unit, zero, title) => { const mk = carMk(form);
+      if (mk) series.forEach((s) => { if (!s.dashed) s.marks = mk.marks; });
+      return lineBox(series, { xlabels: Object.fromEntries(form.map((f, i) => [i + 1, fmtDate(f.date)])),
+        links: series.map(() => Object.fromEntries(form.map((f, i) => [i + 1, f.sid]))), yfmt: fmt, unit, zero, shapeKey: mk ? mk.key : null }, title + CLICK_HINT, 300); };
     const tabs = tabset([
       { title: "Tracks", make: () => table(["Track", "Best lap", "Rank", "Track record", "Gap to record", "Ideal lap", "Sessions", "Laps", "Valid", "Car", "Date"], car.map((r) => h("tr", null,
         td(trackLabel(r.track, r.layout), "b"), td(r.best ? fmtTime(r.best) : "-", "r " + pc(r.pos === 1, "purple b")), td(r.pos ? `${r.pos} of ${r.of}` : "-", "c " + (r.pos && r.pos <= 3 ? "b " + medalClass(r.pos) : "")),
@@ -501,7 +532,8 @@ function viewDrivers() {
           const r = have.find((x) => x.tkey === sel.value) || have[0];
           let low = 0, cur = ""; const pts = [], run = [], xl = {}, links = {}, runLinks = {};
           r.series.forEach((p, i) => { if (!low || p.best < low) { low = p.best; cur = p.sid; } pts.push([i + 1, p.best]); run.push([i + 1, low]); xl[i + 1] = fmtDate(p.date); links[i + 1] = p.sid; runLinks[i + 1] = cur; });
-          holder.append(lineBox([{ label: "Best lap of the session", color: DRIVER_COLORS[1], pts }, { label: "Best so far", color: DRIVER_COLORS[0], pts: run }], { xlabels: xl, links: [links, runLinks] },
+          const mk = carMk(r.series);
+          holder.append(lineBox([{ label: "Best lap of the session", color: DRIVER_COLORS[1], pts, marks: mk ? mk.marks : undefined }, { label: "Best so far", color: DRIVER_COLORS[0], pts: run }], { xlabels: xl, links: [links, runLinks], shapeKey: mk ? mk.key : null },
             "Blue = the driver's best lap of each session at this track, red = their best so far (their personal record coming down). Left to right = their sessions there, oldest first." + CLICK_HINT));
         }
         wrap.append(pickerBar(field("Track:", sel)), holder); draw();
@@ -530,8 +562,9 @@ function viewDrivers() {
           clear(holder);
           const fs = form.filter((f) => f.tkey === sel.value && f.sec.every((x) => x)), pb = [0, 1, 2].map((k) => Math.min(...fs.map((f) => f.sec[k])));
           const xl = Object.fromEntries(fs.map((f, i) => [i + 1, fmtDate(f.date)])), lk = Object.fromEntries(fs.map((f, i) => [i + 1, f.sid]));
-          holder.append(lineBox([0, 1, 2].map((k) => ({ label: "Sector " + (k + 1), color: SECTOR_COLORS[k], pts: fs.map((f, i) => [i + 1, (f.sec[k] - pb[k]) / 1000]) })),
-            { xlabels: xl, links: [lk, lk, lk], yfmt: (v) => v.toFixed(2) + " s", unit: 0.1, zero: true, bigdots: true },
+          const mk = carMk(fs);
+          holder.append(lineBox([0, 1, 2].map((k) => ({ label: "Sector " + (k + 1), color: SECTOR_COLORS[k], pts: fs.map((f, i) => [i + 1, (f.sec[k] - pb[k]) / 1000]), marks: mk ? mk.marks : undefined })),
+            { xlabels: xl, links: [lk, lk, lk], yfmt: (v) => v.toFixed(2) + " s", unit: 0.1, zero: true, bigdots: true, shapeKey: mk ? mk.key : null },
             "The driver's best sector 1 (blue), 2 (orange) and 3 (green) of each session at this track, as the time behind their own best sector ever (0 = their personal best). A sector that stays high has stopped improving. Left to right = their sessions there, oldest first." + CLICK_HINT, 300));
         }
         wrap.append(pickerBar(field("Track:", sel)), holder); draw();
@@ -595,15 +628,17 @@ function viewDrivers() {
 /* ---------------------------------------------------------------- head to head */
 function viewH2h() {
   const root = h("div", { class: "page" });
-  const st = P.h2h, ss = sortedSessions(allSessions());
-  const drv = statsDrivers(ss), byName = [...drv].sort((a, b) => cmp(lc(nameOf(a.pid)), lc(nameOf(b.pid))));
+  const st = P.h2h, ssAll = sortedSessions(allSessions());
+  const ss = filterSessions(ssAll, periodSince(PERIODS[st.period][1]), st.weather);
+  const drv = statsDrivers(ssAll), byName = [...drv].sort((a, b) => cmp(lc(nameOf(a.pid)), lc(nameOf(b.pid))));
   if (drv.length < 2) return h("div", { class: "page" }, noData("Head-to-head needs at least two drivers."));
   if (!drv.some((d) => d.pid === st.a)) st.a = drv[0].pid;
   if (!drv.some((d) => d.pid === st.b) || st.b === st.a) st.b = drv.find((d) => d.pid !== st.a).pid;
   const mk = (key) => { const sel = h("select", { "aria-label": "Driver " + key.toUpperCase(), onchange: () => { st[key] = sel.value; renderView(); } }, byName.map((d) => option(d.pid, nameOf(d.pid), d.pid === st[key]))); return sel; };
   const swap = h("button", { class: "btn sq", type: "button", title: "Swap the two drivers", "aria-label": "Swap", text: "⇄", onclick: () => { [st.a, st.b] = [st.b, st.a]; renderView(); } });
   const detail = h("div");
-  root.append(pickerBar(field("A:", mk("a")), h("span", { class: "dim", text: "vs" }), field("B:", mk("b")), swap, h("span", { class: "grow" }),
+  root.append(pickerBar(field("A:", mk("a")), h("span", { class: "dim", text: "vs" }), field("B:", mk("b")), swap,
+    selectOf("Period:", st.period, PERIODS.map(([t], i) => [i, t]), (v) => { st.period = +v; renderView(); }), selectOf("Weather:", st.weather, WEATHERS, (v) => { st.weather = v; renderView(); }), h("span", { class: "grow" }),
     csvButton(() => visibleTable(detail), () => `${nameOf(st.a)}_vs_${nameOf(st.b)}`)), detail);
   const na = nameOf(st.a), nb = nameOf(st.b), [sa, sb] = shortNames(na, nb);
   const res = statsH2h(ss, st.a, st.b), s = res.summary;
