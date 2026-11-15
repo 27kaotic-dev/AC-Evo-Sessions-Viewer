@@ -411,7 +411,7 @@ function viewTracks() {
     const sw = ss0.filter((s) => weatherOk(s, st.weather));
     const board = statsBoard(sw, x.tkey, car, since).filter((r) => r.best);
     const here = sw.filter((s) => trackKey(s.track, s.layout) === x.tkey && (!since || s.date >= since) && (!car || s.entries.some((e) => car.has(e.car))));
-    const bar = pickerBar(selectOf("Track:", st.sel, tracks.map((t) => [t.tkey, `${trackLabel(t.track, t.layout)}  (${t.sessions} session${t.sessions === 1 ? "" : "s"})`]), (v) => { st.sel = v; drawDetail(); }),
+    const bar = pickerBar(selectOf("Track:", st.sel, tracks.map((t) => [t.tkey, trackLabel(t.track, t.layout)]), (v) => { st.sel = v; drawDetail(); }),
       carTickBox(x.cars, st.cars, drawDetail),
       selectOf("Period:", st.period, PERIODS.map(([t], i) => [i, t]), (v) => { st.period = +v; drawDetail(); }),
       selectOf("Weather:", st.weather, WEATHERS, (v) => { st.weather = v; drawDetail(); }), h("span", { class: "grow" }),
