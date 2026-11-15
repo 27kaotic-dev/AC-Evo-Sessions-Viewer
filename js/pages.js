@@ -285,8 +285,14 @@ function tRuns(rows) {
   draw();
   return h("div", null, pickerBar(selectOf("Driver:", RUNSEL.pid, have.map((r) => [r.pid, nameOf(r.pid)]), (v) => { RUNSEL.pid = v; draw(); }), outlierPicker(renderView)), holder);
 }
-/* the colour of a gap (ms): green when it is right behind the fastest, one step towards red every 0.1 s, fully red from 1 s */
-function gapColor(ms) { const step = Math.min(10, Math.max(0, Math.floor(ms / 100))); return `hsl(${Math.round(120 * (1 - step / 10))} 68% 48%)`; }
+/* the colour of a gap (ms): green when it is right behind the fastest, one step towards red every 0.1 s, fully red from 2 s */
+function gapColor(ms) { const step = Math.min(20, Math.max(0, Math.floor(ms / 100))); return `hsl(${Math.round(120 * (1 - step / 20))} 68% 48%)`; }
+/* the key under the Classification table: every colour from 0 to 2 seconds behind */
+function gapKey() {
+  return h("div", { class: "gapkey", title: "The colour of the Distance To Fastest bar: one step every 0.1 s" }, h("span", { text: "Behind the fastest:" }), h("span", { text: "0 s" }),
+    ...[[0, 11], [11, 21]].flatMap(([a, b], k) => [k ? h("span", { text: "1 s" }) : null, h("span", { class: "gk" }, Array.from({ length: b - a }, (_, j) => { const i = a + j; return h("i", { style: { background: gapColor(i * 100) }, title: (i / 10).toFixed(1) + " s" + (i === 20 ? " or more" : "") }); }))]).filter(Boolean),
+    h("span", { text: "2 s or more" }));
+}
 function tClass(rows, sess) {
   const km = findKm(sess.track, sess.layout), lead = rows.length && rows[0].best ? rows[0].best : 0, mx = Math.max(1, ...rows.map((r) => r.gap || 0));
   const trs = rows.map((r) => {
@@ -296,9 +302,10 @@ function tClass(rows, sess) {
       td(st.ideal ? fmtTime(st.ideal) : "", "r dim"), td(st.laps, "c"), td(st.valid, "c dim"),
       barCell(r.gap ? [[r.gap, gapColor(r.gap)]] : [], mx, r.gap ? (km ? Math.round(gapMetres(r.gap, lead, km)) + "m" : "+" + (r.gap / 1000).toFixed(3) + " s") : "", r.gap ? gapLabel(r.gap, lead, km) + " behind " + nameOf(rows[0].pid) : ""));
   });
-  return table(["Pos", "Driver", "Car", "No.", "Best lap", "Gap", "Interval", "Ideal lap", "Laps", "Valid", "Distance To Fastest"], trs, "", [
+  const tbl = table(["Pos", "Driver", "Car", "No.", "Best lap", "Gap", "Interval", "Ideal lap", "Laps", "Valid", "Distance To Fastest"], trs, "", [
     "Position by best valid lap", "Driver", "Car", "Race number", "The fastest lap the game counted", "Behind the fastest lap of the session", "Behind the driver ranked just above",
-    "The best sectors of all their valid laps added together", "Laps driven", "Laps the game counted (no cut)", "Metres Behind = Track Length (m) × Gap (s) ÷ Fastest Lap (s). Colour: green = right behind the fastest, shading to red at 1 second or more behind (a step every 0.1 s)"]);
+    "The best sectors of all their valid laps added together", "Laps driven", "Laps the game counted (no cut)", "Metres Behind = Track Length (m) × Gap (s) ÷ Fastest Lap (s). Colour: green = right behind the fastest, shading to red at 2 seconds or more behind (a step every 0.1 s)"]);
+  return h("div", null, tbl, gapKey());
 }
 
 function trackRecord(sess) {

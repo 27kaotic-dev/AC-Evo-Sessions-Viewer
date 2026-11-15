@@ -57,3 +57,6 @@ td.barcell { min-width: 300px; padding: 3px 8px; }
 .carrow { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 5px; cursor: pointer; font-size: 13px; }
 .carrow:hover { background: var(--panel2); }
 .carmark { color: var(--dim); width: 14px; text-align: center; }
+.gapkey { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--dim); margin: 8px 2px 0; }
+.gapkey .gk { display: inline-flex; border-radius: 4px; overflow: hidden; }
+.gapkey .gk i { display: block; width: 14px; height: 12px; }
