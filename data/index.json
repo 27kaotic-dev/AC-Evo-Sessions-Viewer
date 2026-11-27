@@ -1,7 +1,7 @@
 {
  "format": 1,
  "app": "ACEVO Results Viewer",
- "updated": "2026-11-27T20:29:54",
+ "updated": "2026-11-27T22:37:32",
  "sessions": [
   {
    "id": "0e6f487092f1",
@@ -2906,6 +2906,20 @@
    "drivers": 1,
    "laps": 2,
    "fp": "c5e78555cd78",
+   "cloud": true
+  },
+  {
+   "id": "9c7f437e2863",
+   "file": "sessions/9c7f437e2863.json",
+   "track": "Nurburgring",
+   "layout": "Sprint",
+   "date": "2026-11-28",
+   "time": "11:37:31",
+   "type": "Practice",
+   "weather": "",
+   "drivers": 1,
+   "laps": 2,
+   "fp": "6fffdea8c72d",
    "cloud": true
   }
  ],
